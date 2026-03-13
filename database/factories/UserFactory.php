@@ -2,43 +2,46 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
-
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'email'     => $this->faker->unique()->safeEmail(),
+            'password'  => Hash::make('Password1'), // meets: 8 chars, upper, lower, digit
+            'name'      => $this->faker->name(),
+            'avatar'    => $this->faker->imageUrl(100, 100, 'people'),
+            'role_id'   => Role::where('name', 'user')->first()?->id ?? 2,
+            'status'    => $this->faker->randomElement(['pending', 'active', 'active', 'active', 'blocked']),
+            // weighted: more active users than pending/blocked
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    // Reusable states
+    public function active(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+        return $this->state(['status' => 'active']);
+    }
+
+    public function pending(): static
+    {
+        return $this->state(['status' => 'pending']);
+    }
+
+    public function blocked(): static
+    {
+        return $this->state(['status' => 'blocked']);
+    }
+
+    public function admin(): static
+    {
+        return $this->state([
+            'role_id' => Role::where('name', 'admin')->first()?->id ?? 1,
+            'status'  => 'active',
         ]);
     }
 }

@@ -1,0 +1,97 @@
+---
+config:
+  theme: neo-dark
+---
+classDiagram
+direction TB
+    class User {
+	    -int id
+	    -string email
+	    -string password
+	    -string name
+	    -string avatar
+	    -int role_id
+	    -enum status
+	    -datetime created_at
+	    -datetime updated_at
+    }
+
+    class Role {
+	    -int id
+	    -string name
+    }
+
+    class MoodEntry {
+	    -int id
+	    -int user_id
+	    -int mood_level
+	    -float sleep_hours
+	    -string reflection
+	    -date entry_date
+	    -datetime created_at
+	    -datetime updated_at
+    }
+
+    class Feeling {
+	    -int id
+	    -string name
+	    -string icon
+	    -string color
+    }
+
+    class MoodEntryFeeling {
+	    -int id
+	    -int mood_entry_id
+	    -int feeling_id
+    }
+
+    class Quote {
+	    -int id
+	    -string text
+	    -string author
+	    -int category_id
+	    -boolean is_active
+	    -datetime created_at
+    }
+
+    class QuoteCategory {
+	    -int id
+	    -string name
+	    -int mood_level
+    }
+
+    class AdminAction {
+	    -int id
+	    -int admin_id
+	    -int target_user_id
+	    -enum action_type
+	    -string reason
+	    -datetime created_at
+    }
+
+    class Notification {
+	    -int id
+	    -int user_id
+	    -string title
+	    -string message
+	    -boolean is_read
+	    -datetime sent_at
+    }
+
+    class UserSettings {
+	    -int id
+	    -int user_id
+	    -time reminder_time
+	    -boolean reminder_enabled
+	    -string timezone
+	    -datetime updated_at
+    }
+
+    User "1" -- "1" Role : a un
+    User "1" -- "0..*" MoodEntry : crée
+    User "1" -- "0..*" Notification : reçoit
+    User "1" -- "0..1" UserSettings : configure
+    User "1" -- "0..*" AdminAction : effectue (admin)
+    MoodEntry "1" -- "0..*" MoodEntryFeeling
+    MoodEntryFeeling "0..*" -- "1" Feeling
+    QuoteCategory "1" -- "0..*" Quote : contient
