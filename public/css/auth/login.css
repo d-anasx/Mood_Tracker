@@ -1,0 +1,236 @@
+/* ================================================================
+   login.css
+   Styles specific to the Login page only.
+   Place this file in: public/css/auth/login.css
+   ================================================================ */
+
+/* ── Split layout ── */
+.login-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+  position: relative;
+}
+
+/* Vertical separator */
+.vline {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(212, 165, 181, 0.12), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Left panel ── */
+.login-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 5rem;
+  opacity: 0;
+  animation: slide-left 0.9s cubic-bezier(.22, 1, .36, 1) 0.2s forwards;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.6rem, 4vw, 3.8rem);
+  line-height: 1.15;
+  color: #f0e6ee;
+  margin-bottom: 1.5rem;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--bloom);
+}
+
+.hero-sub {
+  font-size: 1rem;
+  color: rgba(169, 180, 194, 0.75);
+  line-height: 1.7;
+  max-width: 380px;
+  margin-bottom: 3rem;
+}
+
+/* Mood bars preview */
+.mood-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 340px;
+}
+
+.mood-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  animation: float-up 0.6s cubic-bezier(.22, 1, .36, 1) forwards;
+}
+
+.mood-bar-row:nth-child(1) { animation-delay: 1.0s; }
+.mood-bar-row:nth-child(2) { animation-delay: 1.15s; }
+.mood-bar-row:nth-child(3) { animation-delay: 1.3s; }
+.mood-bar-row:nth-child(4) { animation-delay: 1.45s; }
+
+.bar-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--mist);
+  width: 52px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: 0%;
+  transition: width 2.5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.bar-val {
+  font-size: 0.7rem;
+  color: var(--bloom);
+  width: 30px;
+  flex-shrink: 0;
+}
+
+/* ── Right panel — card wrapper ── */
+.login-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-card {
+  padding: 3rem 2.8rem;
+  width: 100%;
+  max-width: 420px;
+  opacity: 0;
+  animation: float-up 0.8s cubic-bezier(.22, 1, .36, 1) 0.5s forwards;
+}
+
+/* Card header */
+.card-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bloom);
+  margin-bottom: 0.5rem;
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  color: #f0e6ee;
+  margin-bottom: 0.4rem;
+}
+
+.card-sub {
+  font-size: 0.85rem;
+  color: rgba(169, 180, 194, 0.6);
+  margin-bottom: 2.2rem;
+}
+
+/* Emotion chips */
+.emotion-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 2rem;
+}
+
+.emotion-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  color: rgba(169, 180, 194, 0.6);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.emotion-chip:hover,
+.emotion-chip.active {
+  background: rgba(212, 165, 181, 0.12);
+  border-color: rgba(212, 165, 181, 0.3);
+  color: var(--bloom);
+}
+
+/* Meta row (remember me + forgot) */
+.meta-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -0.6rem;
+  margin-bottom: 1.6rem;
+}
+
+.meta-links a {
+  font-size: 0.78rem;
+  color: rgba(169, 180, 194, 0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.meta-links a:hover {
+  color: var(--bloom);
+}
+
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: rgba(169, 180, 194, 0.5);
+}
+
+/* Bottom link */
+.register-link {
+  text-align: center;
+  font-size: 0.82rem;
+  color: rgba(169, 180, 194, 0.45);
+  margin-top: 1.8rem;
+}
+
+.register-link a {
+  color: var(--bloom);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.register-link a:hover {
+  opacity: 0.75;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .login-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .login-left { display: none; }
+  .vline      { display: none; }
+}

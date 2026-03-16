@@ -1,0 +1,434 @@
+/* ================================================================
+   register.css
+   Styles specific to the Register / multi-step wizard page only.
+   Place this file in: public/css/auth/register.css
+   ================================================================ */
+
+/* ── Page wrapper ── */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+/* ── Wide two-column card ── */
+.register-card {
+  width: 100%;
+  max-width: 860px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  overflow: hidden;
+  opacity: 0;
+  animation: float-up 0.8s cubic-bezier(.22, 1, .36, 1) 0.3s forwards;
+}
+
+/* ================================================================
+   SIDEBAR
+   ================================================================ */
+.reg-sidebar {
+  background: rgba(255, 255, 255, 0.025);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 2.8rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo */
+.reg-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2.5rem;
+}
+
+.reg-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--grad-primary);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.reg-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #f0e6ee;
+}
+
+/* Step list */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.step-item {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 2rem;
+}
+
+.step-item:last-child {
+  padding-bottom: 0;
+}
+
+/* Connector line */
+.step-item::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 32px;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(212, 165, 181, 0.18), transparent);
+}
+
+.step-item:last-child::before {
+  display: none;
+}
+
+/* Step circle */
+.step-circle {
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(212, 165, 181, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: rgba(169, 180, 194, 0.35);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.step-circle.is-active {
+  background: var(--grad-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(192, 88, 122, 0.4);
+}
+
+.step-circle.is-done {
+  background: rgba(78, 205, 196, 0.15);
+  border-color: rgba(78, 205, 196, 0.4);
+  color: var(--teal);
+}
+
+/* Step text */
+.step-text { padding-top: 4px; }
+
+.step-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(240, 230, 238, 0.3);
+  transition: color 0.3s;
+}
+
+.step-name.is-active { color: #f0e6ee; }
+.step-name.is-done   { color: rgba(78, 205, 196, 0.8); }
+
+.step-desc {
+  font-size: 0.7rem;
+  color: rgba(169, 180, 194, 0.28);
+  margin-top: 2px;
+  transition: color 0.3s;
+}
+
+.step-desc.is-active { color: rgba(169, 180, 194, 0.5); }
+
+/* Sidebar progress bar */
+.sidebar-progress {
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: rgba(169, 180, 194, 0.4);
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--grad-primary);
+  transition: width 0.5s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ================================================================
+   MAIN CONTENT AREA
+   ================================================================ */
+.reg-main {
+  padding: 2.8rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Step header */
+.step-header {
+  margin-bottom: 1.8rem;
+}
+
+.step-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--bloom);
+  margin-bottom: 0.3rem;
+}
+
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  color: #f0e6ee;
+  margin-bottom: 0.3rem;
+}
+
+.step-subtitle {
+  font-size: 0.84rem;
+  color: rgba(169, 180, 194, 0.55);
+}
+
+/* ── Step panels ── */
+.step-panel {
+  display: none;
+}
+
+.step-panel.is-active {
+  display: block;
+  animation: step-in 0.45s cubic-bezier(.22, 1, .36, 1) forwards;
+}
+
+/* ── Field row (two columns) ── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Password strength bars ── */
+.pw-strength {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.pw-bar {
+  height: 3px;
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  transition: background 0.3s;
+}
+
+.pw-bar.is-weak   { background: #e05263; }
+.pw-bar.is-fair   { background: #f4a261; }
+.pw-bar.is-strong { background: #4ecdc4; }
+
+.pw-hint {
+  font-size: 0.68rem;
+  color: rgba(169, 180, 194, 0.35);
+  margin-top: 5px;
+}
+
+/* ── Avatar picker ── */
+.avatar-hint {
+  font-size: 0.75rem;
+  color: rgba(169, 180, 194, 0.45);
+  margin-bottom: 10px;
+}
+
+.avatar-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.avatar-opt {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.avatar-opt:hover {
+  border-color: rgba(212, 165, 181, 0.4);
+  transform: scale(1.08);
+}
+
+.avatar-opt.is-selected {
+  border-color: #c0587a;
+  box-shadow: 0 0 0 3px rgba(192, 88, 122, 0.22);
+  transform: scale(1.1);
+}
+
+/* ── Feeling grid ── */
+.feeling-hint {
+  font-size: 0.75rem;
+  color: rgba(169, 180, 194, 0.45);
+  margin-bottom: 10px;
+}
+
+.feeling-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 1.4rem;
+}
+
+.feeling-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+  color: rgba(169, 180, 194, 0.6);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.feeling-btn .emoji {
+  font-size: 1.6rem;
+}
+
+.feeling-btn:hover {
+  background: rgba(212, 165, 181, 0.08);
+  border-color: rgba(212, 165, 181, 0.25);
+  color: var(--bloom);
+  transform: translateY(-2px);
+}
+
+.feeling-btn.is-selected {
+  background: rgba(192, 88, 122, 0.15);
+  border-color: rgba(192, 88, 122, 0.45);
+  color: #f0e6ee;
+  box-shadow: 0 0 16px rgba(192, 88, 122, 0.2);
+}
+
+/* ── Mood slider ── */
+.mood-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 1.2rem;
+}
+
+.mood-slider-row input[type="range"] {
+  flex: 1;
+  accent-color: #c0587a;
+  cursor: pointer;
+}
+
+.mood-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--bloom);
+  min-width: 28px;
+}
+
+/* ── Button row ── */
+.btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.6rem;
+}
+
+/* ── Success screen ── */
+.success-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0 0.5rem;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--grad-teal);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin-bottom: 1.4rem;
+  box-shadow: 0 0 40px rgba(78, 205, 196, 0.3);
+  animation: check-pop 0.5s cubic-bezier(.22, 1, .36, 1) 0.2s both;
+}
+
+.success-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  color: #f0e6ee;
+  margin-bottom: 0.6rem;
+}
+
+.success-sub {
+  font-size: 0.88rem;
+  color: rgba(169, 180, 194, 0.55);
+  max-width: 300px;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* ── Bottom link ── */
+.login-link {
+  text-align: center;
+  font-size: 0.82rem;
+  color: rgba(169, 180, 194, 0.4);
+  margin-top: 1.5rem;
+}
+
+.login-link a {
+  color: var(--bloom);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.login-link a:hover {
+  opacity: 0.75;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .register-card        { grid-template-columns: 1fr; }
+  .reg-sidebar          { display: none; }
+  .field-row            { grid-template-columns: 1fr; }
+  .feeling-grid         { grid-template-columns: repeat(3, 1fr); }
+}

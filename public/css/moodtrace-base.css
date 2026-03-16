@@ -1,0 +1,477 @@
+/* ================================================================
+   moodtrace-base.css
+   Global styles shared across ALL MoodTrace pages.
+   Place this file in: public/css/moodtrace-base.css
+   ================================================================ */
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── CSS Variables ── */
+:root {
+  --ink:     #0f0e17;
+  --petal:   #e8c4c4;
+  --bloom:   #d4a5b5;
+  --dusk:    #7c6e8a;
+  --glow:    #f4a261;
+  --mist:    #a9b4c2;
+  --teal:    #4ecdc4;
+
+  --grad-primary: linear-gradient(135deg, #c0587a 0%, #7c3fa0 100%);
+  --grad-teal:    linear-gradient(135deg, #4ecdc4 0%, #2fa89f 100%);
+
+  --radius-card:  28px;
+  --radius-input: 14px;
+  --radius-btn:   14px;
+
+  --shadow-card:
+    0 0 0 1px rgba(212, 165, 181, 0.06),
+    0 40px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --shadow-btn-primary: 0 8px 30px rgba(192, 88, 122, 0.35);
+  --shadow-btn-hover:   0 12px 40px rgba(192, 88, 122, 0.5);
+}
+
+/* ── Base ── */
+html, body {
+  min-height: 100%;
+  background: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  color: #f0e6ee;
+}
+
+/* ================================================================
+   BACKGROUND SCENE
+   ================================================================ */
+.bg-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, #1a0e2e 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, #0d1b2a 0%, transparent 60%),
+    var(--ink);
+  overflow: hidden;
+}
+
+/* Grain texture overlay */
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* ── Orbs ── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.orb-purple {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, #6b3fa0 0%, transparent 70%);
+  top: -100px;
+  left: -120px;
+  animation: orb-drift 14s ease-in-out infinite, pulse-glow 4s ease-in-out infinite;
+}
+
+.orb-rose {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #c0587a 0%, transparent 70%);
+  bottom: -80px;
+  right: -80px;
+  animation: orb-drift2 18s ease-in-out infinite;
+}
+
+.orb-amber {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, #f4a261 0%, transparent 70%);
+  top: 40%;
+  right: 30%;
+  opacity: 0.25;
+  animation: orb-drift 22s ease-in-out infinite reverse;
+}
+
+.orb-teal {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, #0d6e6e 0%, transparent 70%);
+  bottom: -60px;
+  left: -80px;
+  animation: orb-drift 22s ease-in-out infinite reverse;
+}
+
+/* ── Decorative rings ── */
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 165, 181, 0.1);
+  pointer-events: none;
+}
+
+.ring-lg {
+  width: 700px;
+  height: 700px;
+  top: -250px;
+  left: -250px;
+  animation: spin-slow 30s linear infinite;
+}
+
+.ring-sm {
+  width: 400px;
+  height: 400px;
+  bottom: -150px;
+  right: -100px;
+  border-color: rgba(244, 162, 97, 0.07);
+  animation: spin-slow 20s linear infinite reverse;
+}
+
+/* ================================================================
+   GLASSMORPHIC CARD  (shared base)
+   ================================================================ */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--shadow-card);
+}
+
+/* ================================================================
+   FLOATING-LABEL FIELD  (shared across login + register)
+   ================================================================ */
+.field {
+  position: relative;
+  margin-bottom: 1.3rem;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-input);
+  padding: 1.05rem 1.2rem 0.45rem;
+  font-size: 0.93rem;
+  color: #f0e6ee;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+
+.field select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.field select option {
+  background: #1a1428;
+}
+
+.field input::placeholder {
+  color: transparent;
+}
+
+.field label {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: var(--dusk);
+  pointer-events: none;
+  transition: all 0.22s cubic-bezier(.22, 1, .36, 1);
+}
+
+.field input:focus,
+.field input:not(:placeholder-shown),
+.field select:focus {
+  border-color: rgba(212, 165, 181, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(212, 165, 181, 0.07);
+}
+
+.field input:focus ~ label,
+.field input:not(:placeholder-shown) ~ label {
+  top: 0.5rem;
+  transform: none;
+  font-size: 0.66rem;
+  color: var(--bloom);
+  letter-spacing: 0.05em;
+}
+
+/* Select always shows floated label */
+.field select ~ label {
+  top: 0.5rem;
+  transform: none;
+  font-size: 0.66rem;
+  color: var(--bloom);
+  letter-spacing: 0.05em;
+}
+
+.field .field-icon {
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dusk);
+  cursor: pointer;
+  transition: color 0.2s;
+  font-size: 1rem;
+  user-select: none;
+}
+
+.field .field-icon:hover {
+  color: var(--bloom);
+}
+
+/* Inline field error */
+.field .field-error {
+  display: none;
+  font-size: 0.7rem;
+  color: #e05263;
+  margin-top: 5px;
+}
+
+.field.has-error input {
+  border-color: rgba(224, 82, 99, 0.45);
+}
+
+.field.has-error .field-error {
+  display: block;
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+
+/* Primary gradient button */
+.btn-primary {
+  width: 100%;
+  padding: 0.95rem;
+  border-radius: var(--radius-btn);
+  background: var(--grad-primary);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-btn-primary);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-btn-hover);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Ghost / back button */
+.btn-ghost {
+  background: none;
+  border: none;
+  color: rgba(169, 180, 194, 0.5);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.btn-ghost:hover {
+  color: var(--bloom);
+}
+
+/* Social button */
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: var(--radius-btn);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(240, 230, 238, 0.8);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.btn-social:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(212, 165, 181, 0.25);
+  transform: translateY(-1px);
+}
+
+/* ================================================================
+   TYPOGRAPHY HELPERS
+   ================================================================ */
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bloom);
+  margin-bottom: 0.4rem;
+}
+
+.display-title {
+  font-family: 'Playfair Display', serif;
+  color: #f0e6ee;
+  line-height: 1.15;
+}
+
+.muted {
+  color: rgba(169, 180, 194, 0.55);
+}
+
+/* ================================================================
+   DIVIDER
+   ================================================================ */
+.divider-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(169, 180, 194, 0.35);
+  font-size: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.divider-text::before,
+.divider-text::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ================================================================
+   MOOD PILL  (small status badge)
+   ================================================================ */
+.mood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212, 165, 181, 0.1);
+  border: 1px solid rgba(212, 165, 181, 0.2);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bloom);
+  backdrop-filter: blur(8px);
+  width: fit-content;
+}
+
+.mood-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--glow);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ================================================================
+   TOGGLE ROW  (settings row with checkbox)
+   ================================================================ */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-input);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.toggle-row .toggle-label {
+  font-size: 0.88rem;
+  color: rgba(240, 230, 238, 0.75);
+}
+
+.toggle-row .toggle-sub {
+  font-size: 0.72rem;
+  color: rgba(169, 180, 194, 0.4);
+  margin-top: 2px;
+}
+
+/* ================================================================
+   ANIMATIONS  (keyframes defined in Tailwind config above,
+   but we redeclare here for non-Tailwind usage)
+   ================================================================ */
+@keyframes float-up {
+  0%   { opacity: 0; transform: translateY(28px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-left {
+  0%   { opacity: 0; transform: translateX(-60px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes orb-drift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  40%     { transform: translate(40px,-30px) scale(1.07); }
+  70%     { transform: translate(-20px,25px) scale(0.95); }
+}
+@keyframes orb-drift2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(-50px,40px) scale(1.1); }
+  66%     { transform: translate(30px,-20px) scale(0.92); }
+}
+@keyframes pulse-glow {
+  0%,100% { opacity: 0.5; transform: scale(1); }
+  50%     { opacity: 0.8; transform: scale(1.05); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes step-in {
+  0%   { opacity: 0; transform: translateX(40px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes check-pop {
+  0%   { transform: scale(0) rotate(-10deg); }
+  60%  { transform: scale(1.2) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes bar-fill {
+  0%   { width: 0%; }
+  100% { width: var(--target-w, 100%); }
+}
