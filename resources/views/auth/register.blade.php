@@ -82,7 +82,7 @@
     <div class="reg-main">
 
       {{-- Master form — all data submitted at once on final step --}}
-      <form action="{{ route('register') }}" method="POST" id="registerForm" novalidate>
+      <form action="{{ route('register') }}" method="POST" id="registerForm" >
         @csrf
 
         {{-- ── STEP 1 — Account ── --}}

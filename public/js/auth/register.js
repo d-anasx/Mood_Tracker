@@ -236,41 +236,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Final submit ──────────────────────────────────────────
 
   form.addEventListener('submit', (e) => {
+    // Validate step 4 before submitting
     if (!validateStep4()) {
       e.preventDefault();
       reminderTimeEl.focus();
       return;
     }
 
+    // Show loading state
     const btn = document.getElementById('submitBtn');
     btn.textContent         = 'Creating account…';
     btn.style.opacity       = '0.8';
     btn.style.pointerEvents = 'none';
 
-    // Show success screen after real submit redirects back
-    // If you want a pure SPA feel keep the preventDefault + show panel-5:
-    e.preventDefault();
-    showSuccess();
+    // ✅ Allow the form to submit normally to Laravel
+    // The form will POST to /register route and redirect
+    // No preventDefault() here!
   });
-
-  function showSuccess() {
-    document.getElementById(`panel-4`).classList.remove('is-active');
-    document.getElementById(`panel-5`).classList.add('is-active');
-
-    for (let i = 1; i <= TOTAL; i++) {
-      const sc = document.getElementById(`sc-${i}`);
-      sc.classList.remove('is-active');
-      sc.classList.add('is-done');
-      sc.textContent = '✓';
-      document.getElementById(`sn-${i}`).classList.remove('is-active');
-      document.getElementById(`sn-${i}`).classList.add('is-done');
-    }
-    progressFill.style.width = '100%';
-    progressPct.textContent  = '100%';
-
-    // Uncomment to actually submit:
-    // form.submit();
-  }
 
   // ── Password strength meter ───────────────────────────────
 
