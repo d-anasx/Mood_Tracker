@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -14,9 +11,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'name',
         'email',
         'password',
-        'name',
         'avatar',
         'role_id',
         'status',
@@ -28,81 +25,84 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'status' => 'string',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
-    // -------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------
+    // ══════════════════════════════════════════════════════════
+    // RELATIONSHIPS
+    // ══════════════════════════════════════════════════════════
 
-    public function role(): BelongsTo
+    public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
-    public function moodEntries(): HasMany
+    public function moodEntries()
     {
         return $this->hasMany(MoodEntry::class);
     }
 
-    public function notifications(): HasMany
+    public function notifications()
     {
         return $this->hasMany(Notification::class);
     }
 
-    public function settings(): HasOne
+    public function settings()
     {
         return $this->hasOne(UserSettings::class);
     }
 
-    public function adminActions(): HasMany
+    public function adminActions()
     {
-        // Actions this user performed as admin
         return $this->hasMany(AdminAction::class, 'admin_id');
     }
 
-    public function receivedAdminActions(): HasMany
+    public function receivedAdminActions()
     {
-        // Actions performed on this user
         return $this->hasMany(AdminAction::class, 'target_user_id');
     }
 
-    // -------------------------------------------------------
-    // Helper methods
-    // -------------------------------------------------------
+    // ══════════════════════════════════════════════════════════
+    // HELPER METHODS
+    // ══════════════════════════════════════════════════════════
 
+    /**
+     * Check if user is admin.
+     */
     public function isAdmin(): bool
     {
-        return $this->role?->name === 'admin';
+        return $this->role->name === 'admin';
     }
 
+    /**
+     * Check if user is active.
+     */
     public function isActive(): bool
     {
         return $this->status === 'active';
     }
 
-    public function isBlocked(): bool
-    {
-        return $this->status === 'blocked';
-    }
-
-    public function isPending(): bool
-    {
-        return $this->status === 'pending';
-    }
-
-    public function todayEntry(): ?MoodEntry
+    /**
+     * Get today's mood entry.
+     */
+    public function todayEntry()
     {
         return $this->moodEntries()
-            ->whereDate('entry_date', today())
+            ->where('entry_date', today()->toDateString())
+            ->with('feelings')
             ->first();
+
     }
 
-    public function lastEntries(int $count = 11)
+    /**
+     * Get last N entries.
+     */
+    public function lastEntries(int $count = 5)
     {
         return $this->moodEntries()
-            ->orderByDesc('entry_date')
-            ->limit($count)
+            ->orderBy('entry_date', 'desc')
+            ->take($count)
             ->get();
     }
 }
