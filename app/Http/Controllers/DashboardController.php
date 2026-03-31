@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MoodEntry;
 use App\Models\Quote;
-use Illuminate\Http\Request;
+use App\Services\GeminiService;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function __construct(private GeminiService $gemini) {}
+
     public function index()
     {
         $user = Auth::user();
 
-        // Today's entry with feelings eager-loaded
         $todayEntry = $user->todayEntry();
 
-        // Last 11 entries for the chart (oldest → newest for left-to-right display)
         $recentEntries = $user->moodEntries()
             ->with('feelings')
             ->orderBy('entry_date', 'desc')
@@ -25,15 +24,63 @@ class DashboardController extends Controller
             ->reverse()
             ->values();
 
-        // Trend: last 5 vs previous 5 (min 10 entries required)
         $trendData = $this->calculateTrend($user);
 
-        // Quote based on today's mood, or any active quote if no entry yet
-        $quote = $todayEntry
-            ? Quote::forMoodLevel($todayEntry->mood_level)   
-            : Quote::where('is_active', true)->inRandomOrder()->first();
+        // ── Quote logic ─────────────────────────────────────
+        // Priority: 1) Gemini AI  2) DB quote  3) hardcoded fallback
+        $quote       = null;
+        $quoteSource = 'fallback';
 
-        // Unread notification count for the nav badge
+        if ($todayEntry) {
+            // 1. Try Gemini
+            $feelingNames = $todayEntry->feelings->pluck('name')->toArray();
+            
+            $aiText = $this->gemini->generateMoodQuote(
+                $todayEntry->mood_level,
+                $feelingNames,
+                $todayEntry->reflection
+            );
+
+            if ($aiText) {
+                $quote       = (object) ['text' => $aiText, 'author' => 'MoodTrace AI'];
+                $quoteSource = 'ai';
+            }
+
+            // 2. Try DB quote
+            if (!$quote) {
+                $dbQuote = Quote::where('is_active', true)->inRandomOrder()->first();
+                if ($dbQuote) {
+                    $quote       = $dbQuote;
+                    $quoteSource = 'db';
+                }
+            }
+
+            // 3. Hardcoded fallback — always shows something
+            if (!$quote) {
+                $fallbacks = [
+                    'Every feeling is valid. Keep going, one moment at a time.',
+                    'You showed up today. That already counts for everything.',
+                    'Small steps forward are still steps forward.',
+                    'Your emotions are information, not permanent states.',
+                    'Taking time to check in with yourself is an act of courage.',
+                ];
+                $quote       = (object) [
+                    'text'   => $fallbacks[array_rand($fallbacks)],
+                    'author' => 'MoodTrace',
+                ];
+                $quoteSource = 'fallback';
+            }
+
+        } else {
+            // No entry today — show a generic encouraging quote
+            $dbQuote = Quote::where('is_active', true)->inRandomOrder()->first();
+            $quote       = $dbQuote ?? (object) [
+                'text'   => 'How are you feeling today? Take a moment to check in with yourself.',
+                'author' => 'MoodTrace',
+            ];
+            $quoteSource = $dbQuote ? 'db' : 'fallback';
+        }
+
         $unreadCount = $user->notifications()->unread()->count();
 
         return view('dashboard.index', compact(
@@ -42,6 +89,7 @@ class DashboardController extends Controller
             'recentEntries',
             'trendData',
             'quote',
+            'quoteSource',
             'unreadCount'
         ));
     }
@@ -55,10 +103,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get();
 
-        // minimum 5 entries required for comparison
-        if ($entries->count() < 10) {
-            return null;
-        }
+        if ($entries->count() < 10) return null;
 
         $recent   = $entries->take(5);
         $previous = $entries->skip(5)->take(5);

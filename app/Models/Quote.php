@@ -12,52 +12,39 @@ class Quote extends Model
 
     public $updatedAt = false;
 
-    protected $fillable = [
-        'text',
-        'author',
-        'category_id',
-        'is_active',
-    ];
+    protected $fillable = ['text', 'author', 'category_id', 'is_active'];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+    protected $casts = ['is_active' => 'boolean'];
 
-    // -------------------------------------------------------
-    // Relationships
-    // -------------------------------------------------------
+    // ── Relationships ──
 
     public function category(): BelongsTo
     {
         return $this->belongsTo(QuoteCategory::class, 'category_id');
     }
 
-    // -------------------------------------------------------
-    // Scopes
-    // -------------------------------------------------------
+    // ── Scopes ──
 
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    // -------------------------------------------------------
-    // Helper methods
-    // -------------------------------------------------------
+    // ── Static helper ──
+    // Returns a single random active Quote object for a given mood level.
+    // Returns null if no matching quote exists.
 
-    /**
-     * Get a random active quote for a given mood level.
-     */
     public static function forMoodLevel(int $moodLevel): ?self
     {
-        $category = QuoteCategory::forMoodLevel($moodLevel);
+        $category = QuoteCategory::where('mood_level', $moodLevel)->first();
 
         if (!$category) {
-            return null;
+            // No exact match — try any active quote
+            return self::where('is_active', true)->inRandomOrder()->first();
         }
 
-        return self::active()
-            ->where('category_id', $category->id)
+        return self::where('category_id', $category->id)
+            ->where('is_active', true)
             ->inRandomOrder()
             ->first();
     }
