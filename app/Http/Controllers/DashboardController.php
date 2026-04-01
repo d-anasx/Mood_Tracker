@@ -34,13 +34,11 @@ class DashboardController extends Controller
         if ($todayEntry) {
             // 1. Try Gemini
             $feelingNames = $todayEntry->feelings->pluck('name')->toArray();
-            
             $aiText = $this->gemini->generateMoodQuote(
                 $todayEntry->mood_level,
                 $feelingNames,
                 $todayEntry->reflection
             );
-
             if ($aiText) {
                 $quote       = (object) ['text' => $aiText, 'author' => 'MoodTrace AI'];
                 $quoteSource = 'ai';
@@ -53,22 +51,6 @@ class DashboardController extends Controller
                     $quote       = $dbQuote;
                     $quoteSource = 'db';
                 }
-            }
-
-            // 3. Hardcoded fallback — always shows something
-            if (!$quote) {
-                $fallbacks = [
-                    'Every feeling is valid. Keep going, one moment at a time.',
-                    'You showed up today. That already counts for everything.',
-                    'Small steps forward are still steps forward.',
-                    'Your emotions are information, not permanent states.',
-                    'Taking time to check in with yourself is an act of courage.',
-                ];
-                $quote       = (object) [
-                    'text'   => $fallbacks[array_rand($fallbacks)],
-                    'author' => 'MoodTrace',
-                ];
-                $quoteSource = 'fallback';
             }
 
         } else {

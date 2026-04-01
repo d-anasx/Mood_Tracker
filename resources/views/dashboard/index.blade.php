@@ -400,7 +400,6 @@
                         if (!res.ok) throw new Error('Request failed');
 
                         const data = await res.json();
-
                         // Swap text with fade
                         quoteText.style.transition = 'opacity 0.3s';
                         quoteText.style.opacity = '0';

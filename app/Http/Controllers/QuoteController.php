@@ -33,7 +33,7 @@ class QuoteController extends Controller
 
         // Try Gemini first
         $aiQuote = $this->gemini->generateMoodQuote($moodLevel, $feelings, $reflection);
-
+        dump("AI Quote: ", $aiQuote);
         if ($aiQuote) {
             return response()->json([
                 'source' => 'ai',

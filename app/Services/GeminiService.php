@@ -9,15 +9,9 @@ use Illuminate\Support\Facades\Cache;
 class GeminiService
 {
     private string $apiKey;
-
-    // Use v1 (stable) not v1beta
     private string $baseUrl = 'https://generativelanguage.googleapis.com/v1/models';
 
-    private array $models = [
-        'gemini-2.5-flash',       // current recommended stable free model
-        'gemini-2.0-flash',       // fallback
-        'gemini-3-flash-preview', // latest preview
-    ];
+    private string $model = 'gemini-2.5-flash';
 
     public function __construct()
     {
@@ -38,29 +32,26 @@ class GeminiService
 
         $prompt = $this->buildPrompt($moodLevel, $feelings, $reflection);
 
-        foreach ($this->models as $model) {
-            $result = $this->callModel($model, $prompt);
+        
+        $result = $this->callModel($this->model, $prompt);
 
-            if ($result === 'RATE_LIMITED') continue;
-            if ($result === 'NOT_FOUND')    continue;
-            if ($result !== null)           return $result;
-        }
-
-        return null;
+        // dump("Gemini result: ", $result);
+        return $result === 'RATE_LIMITED' ? null : $result;
     }
 
     private function callModel(string $model, string $prompt): string|null
     {
         try {
-            $response = Http::timeout(15)
+            $response = Http::timeout(20)
                 ->post("{$this->baseUrl}/{$model}:generateContent?key={$this->apiKey}", [
                     'contents' => [
                         ['parts' => [['text' => $prompt]]]
                     ],
                     'generationConfig' => [
                         'temperature'     => 0.85,
-                        'maxOutputTokens' => 120,
+                        'maxOutputTokens' => 1000,  // enough for 2 full sentences
                         'topP'            => 0.9,
+                        'stopSequences'   => [],    // no early stopping
                     ],
                 ]);
 
@@ -82,7 +73,10 @@ class GeminiService
             if ($status === 404) return 'NOT_FOUND';
             if ($response->failed()) return null;
 
-            return $this->extractQuote($json);
+            $quote = $this->extractQuote($json);
+
+
+            return $quote;
 
         } catch (\Exception $e) {
             Log::error("Gemini exception [{$model}]", ['error' => $e->getMessage()]);
@@ -95,11 +89,25 @@ class GeminiService
         $moodDescription = $this->moodDescription($moodLevel);
         $feelingsList    = !empty($feelings) ? implode(', ', $feelings) : null;
 
-        $prompt  = "You are a compassionate wellness companion. Generate ONE short, original, meaningful motivational quote ";
-        $prompt .= "for someone who is currently feeling {$moodDescription} (mood level {$moodLevel}/10).";
-        if ($feelingsList) $prompt .= " Their current feelings include: {$feelingsList}.";
-        if ($reflection)   $prompt .= " They wrote: \"{$reflection}\".";
-        $prompt .= "\n\nRules:\n- Return ONLY the quote text, nothing else.\n- No quotation marks, no author name, no explanation.\n- Max 2 sentences. Be warm, personal, and uplifting.\n- If mood is low (1-4), be gentle and compassionate.\n- If mood is medium (5-6), be encouraging and grounding.\n- If mood is high (7-10), be celebratory and energising.";
+        $prompt  = "You are a compassionate wellness companion.\n\n";
+        $prompt .= "Generate ONE complete, original, meaningful motivational quote ";
+        $prompt .= "for someone feeling {$moodDescription} (mood level {$moodLevel}/10).";
+
+        if ($feelingsList) {
+            $prompt .= " Their feelings include: {$feelingsList}.";
+        }
+
+        if ($reflection) {
+            $prompt .= " They wrote: \"{$reflection}\".";
+        }
+
+        $prompt .= "\n\nStrict rules:";
+        $prompt .= "\n- Write a COMPLETE quote. Never stop mid-sentence.";
+        $prompt .= "\n- Always end with proper punctuation (. or ! or ?).";
+        $prompt .= "\n- Maximum 2 full sentences.";
+        $prompt .= "\n- Return ONLY the quote text. No quotation marks, no author, no explanation.";
+        $prompt .= "\n- Be warm, personal, and uplifting.";
+        $prompt .= "\n- Tone guide: low mood (1-4) = gentle & compassionate | medium (5-6) = grounding & encouraging | high (7-10) = celebratory & energising.";
 
         return $prompt;
     }
@@ -108,7 +116,12 @@ class GeminiService
     {
         $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
         if (!$text) return null;
-        return trim(str_replace(['"', '"', '"'], '', $text));
+
+        // Clean up stray quotes and extra whitespace
+        $text = trim(str_replace(['"', '"', '"', "'", "\n", "\r"], ['', '', '', '', ' ', ''], $text));
+        $text = preg_replace('/\s+/', ' ', $text); // collapse multiple spaces
+
+        return $text ?: null;
     }
 
     private function extractRetryAfter(array $json): int
