@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
  
-  // ── DOM Elements ──────────────────────────────────────────
+  // DOM Elements
   const journalText = document.getElementById('journalText');
   const charCount = document.getElementById('charCount');
   const analyzeBtn = document.getElementById('analyzeBtn');
@@ -12,66 +12,69 @@ document.addEventListener('DOMContentLoaded', () => {
   const reflectionCount = document.getElementById('reflectionCount');
   const feelingCards = document.querySelectorAll('.feeling-card');
   
-  // ── Mood Labels ───────────────────────────────────────────
+  // Debug: log if elements are found
+  console.log('journalText:', journalText);
+  console.log('analyzeBtn:', analyzeBtn);
+  
+  // Mood labels
   const moodLabels = {
-    1: 'Very Low',
-    2: 'Low',
-    3: 'Poor',
-    4: 'Below Average',
-    5: 'Fair',
-    6: 'Okay',
-    7: 'Good',
-    8: 'Great',
-    9: 'Excellent',
-    10: 'Amazing'
+    1: 'Very Low', 2: 'Low', 3: 'Poor', 4: 'Below Average', 5: 'Fair',
+    6: 'Okay', 7: 'Good', 8: 'Great', 9: 'Excellent', 10: 'Amazing'
   };
   
-  // Initialize character counts
+  // ── Helper: Update button state based on text length ──
+  function updateAnalyzeButton() {
+    if (!journalText || !analyzeBtn) return;
+    const length = journalText.value.length;
+    const shouldEnable = length >= 10;
+    analyzeBtn.disabled = !shouldEnable;
+    if (charCount) charCount.textContent = length;
+    console.log(`Text length: ${length}, button disabled: ${analyzeBtn.disabled}`);
+  }
+  
+  // Initial update (in case there's pre-filled text)
+  updateAnalyzeButton();
+  
+  // Listen to input events on the journal textarea
   if (journalText) {
-    charCount.textContent = journalText.value.length;
-    analyzeBtn.disabled = journalText.value.length < 10;
+    journalText.addEventListener('input', updateAnalyzeButton);
+    journalText.addEventListener('keyup', updateAnalyzeButton); // extra safety
+    journalText.addEventListener('change', updateAnalyzeButton);
   }
   
-  if (reflectionInput && reflectionCount) {
-    reflectionCount.textContent = reflectionInput.value.length;
-  }
-  
-  // ── Character Count for Journal ──────────────────────────
-  if (journalText) {
-    journalText.addEventListener('input', () => {
-      const count = journalText.value.length;
-      charCount.textContent = count;
-      analyzeBtn.disabled = count < 10;
-    });
-  }
-  
-  // ── Character Count for Reflection ───────────────────────
+  // ── Reflection character count ──
   if (reflectionInput && reflectionCount) {
     reflectionInput.addEventListener('input', () => {
       reflectionCount.textContent = reflectionInput.value.length;
     });
+    reflectionCount.textContent = reflectionInput.value.length; // init
   }
   
-  // ── Mood Slider ───────────────────────────────────────────
+  // ── Mood slider ──
   if (moodSlider) {
     moodSlider.addEventListener('input', () => {
       const value = parseInt(moodSlider.value);
       moodValue.textContent = value;
       moodLabel.textContent = moodLabels[value];
     });
+    // Initialize display
+    const initVal = parseInt(moodSlider.value);
+    moodValue.textContent = initVal;
+    moodLabel.textContent = moodLabels[initVal];
   }
   
-  // ── AI Analysis ───────────────────────────────────────────
+  // ── AI Analysis (only if button exists) ──
   if (analyzeBtn) {
     analyzeBtn.addEventListener('click', async () => {
       const text = journalText.value.trim();
       
+      // Double-check length
       if (text.length < 10) {
         alert('Please write at least 10 characters before analyzing.');
         return;
       }
       
-      // Show loading state
+      // Loading state
       analyzeBtn.classList.add('is-loading');
       analyzeBtn.disabled = true;
       
@@ -98,18 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Failed to analyze your journal. Please try again.\n\n' + error.message);
       } finally {
         analyzeBtn.classList.remove('is-loading');
-        analyzeBtn.disabled = false;
+        // Re-enable only if text length still meets requirement
+        analyzeBtn.disabled = journalText.value.length < 10;
       }
     });
   }
   
-  // ── Display AI Analysis Results ──────────────────────────
+  // ── Display analysis (same as before, with safe null checks) ──
   function displayAnalysis(analysis) {
-    // Emotional Tone
     const emotionalToneEl = document.getElementById('emotionalTone');
     if (emotionalToneEl) emotionalToneEl.textContent = analysis.emotional_tone || 'N/A';
     
-    // Detected Emotions
     const emotionsContainer = document.getElementById('detectedEmotions');
     if (emotionsContainer) {
       emotionsContainer.innerHTML = '';
@@ -125,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    // Suggested Mood Level with fixed event handling
     const suggestedMoodContainer = document.getElementById('suggestedMood');
     if (suggestedMoodContainer) {
       const moodLevel = analysis.mood_level || 5;
@@ -140,8 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </button>
         </div>
       `;
-      
-      // Attach event listener to the newly created button
       const useBtn = suggestedMoodContainer.querySelector('.use-suggestion-btn');
       if (useBtn) {
         useBtn.addEventListener('click', (e) => {
@@ -151,43 +150,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    // AI Advice
     const adviceEl = document.getElementById('aiAdvice');
     if (adviceEl) adviceEl.textContent = analysis.advice || 'No advice available';
     
-    // Auto-select suggested feelings if available
     if (analysis.suggested_feelings && analysis.suggested_feelings.length > 0) {
       autoSelectFeelings(analysis.suggested_feelings);
     }
     
-    // Show the analysis panel with animation
     if (aiAnalysis) {
       aiAnalysis.style.display = 'block';
       aiAnalysis.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
   
-  // ── Use Suggested Mood (fixed event handling) ────────────────────
   function useSuggestedMood(value, buttonElement) {
     if (moodSlider) {
       moodSlider.value = value;
       moodValue.textContent = value;
       moodLabel.textContent = moodLabels[value];
-      
-      // Smooth scroll to mood section
-      document.querySelector('.mood-slider-container')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-      
-      // Visual feedback on the button
+      document.querySelector('.mood-slider-container')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       if (buttonElement) {
         const originalText = buttonElement.textContent;
         buttonElement.textContent = '✓ Applied';
         buttonElement.style.background = 'rgba(16, 185, 129, 0.3)';
         buttonElement.style.borderColor = 'rgb(16, 185, 129)';
         buttonElement.style.color = 'rgb(16, 185, 129)';
-        
         setTimeout(() => {
           buttonElement.textContent = originalText;
           buttonElement.style.background = '';
@@ -198,17 +185,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // Make function available globally for any dynamic buttons
   window.useSuggestedMood = useSuggestedMood;
   
-  // ── Auto-Select Suggested Feelings (case-insensitive) ───────────────────────
   function autoSelectFeelings(suggestedFeelings) {
-    // Clear existing selections
-    document.querySelectorAll('.feeling-checkbox').forEach(cb => {
-      cb.checked = false;
-    });
-    
-    // Select matching feelings (case-insensitive trim comparison)
+    document.querySelectorAll('.feeling-checkbox').forEach(cb => cb.checked = false);
     suggestedFeelings.forEach(suggestedFeeling => {
       const normalizedSuggested = suggestedFeeling.trim().toLowerCase();
       feelingCards.forEach(card => {
@@ -224,10 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // ── Feeling Card Interactions ────────────────────────────
+  // Feeling card clicks
   feelingCards.forEach(card => {
     card.addEventListener('click', (e) => {
-      // Prevent toggling if clicking directly on checkbox (already toggles naturally)
       if (e.target.type !== 'checkbox') {
         const checkbox = card.querySelector('.feeling-checkbox');
         if (checkbox) checkbox.checked = !checkbox.checked;
@@ -235,20 +214,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
-  // ── Form Validation ───────────────────────────────────────
+  // Form validation
   const form = document.getElementById('moodEntryForm');
   if (form) {
     form.addEventListener('submit', (e) => {
       const moodValueNum = parseInt(moodSlider?.value);
-      
       if (isNaN(moodValueNum) || moodValueNum < 1 || moodValueNum > 10) {
         e.preventDefault();
         alert('Please select a mood level between 1 and 10');
         moodSlider?.focus();
         return false;
       }
-      
-      // Show loading state on submit button
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -256,5 +232,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
 });

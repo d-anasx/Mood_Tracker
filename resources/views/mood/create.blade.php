@@ -225,5 +225,5 @@
 @endsection
 
 @push('scripts')
-  <script src="{{ asset('js/mood-entry.js') }}"></script>
+  <script src="{{ asset('js/mood-entry.js') }}" defer></script>
 @endpush
