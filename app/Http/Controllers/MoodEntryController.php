@@ -19,7 +19,6 @@ class MoodEntryController extends Controller
         $user = Auth::user();
         $todayEntry = $user->todayEntry();
         
-        // If entry exists today, redirect to edit
         if ($todayEntry) {
             return redirect()->route('mood.edit', $todayEntry->id);
         }
@@ -49,10 +48,10 @@ class MoodEntryController extends Controller
             ]);
             
         } catch (\Exception $e) {
+            \Log::error('Gemini analysis failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to analyze journal entry. Please try again.',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -62,10 +61,11 @@ class MoodEntryController extends Controller
      */
     private function callGeminiAPI($journalText)
     {
-        $apiKey = env('GEMINI_API_KEY');
+        // FIXED: Use config instead of env()
+        $apiKey = config('services.gemini.key');
         
         if (!$apiKey) {
-            throw new \Exception('Gemini API key not configured');
+            throw new \Exception('Gemini API key not configured. Add GEMINI_API_KEY to .env');
         }
         
         $prompt = $this->buildAnalysisPrompt($journalText);
@@ -159,6 +159,11 @@ PROMPT;
         // Ensure mood_level is between 1-10
         $parsed['mood_level'] = max(1, min(10, (int)$parsed['mood_level']));
         
+        // Ensure suggested_feelings is an array
+        if (!isset($parsed['suggested_feelings']) || !is_array($parsed['suggested_feelings'])) {
+            $parsed['suggested_feelings'] = [];
+        }
+        
         return $parsed;
     }
     
@@ -177,7 +182,6 @@ PROMPT;
         
         $user = Auth::user();
         
-        // Check if entry already exists today
         $existingEntry = $user->todayEntry();
         if ($existingEntry) {
             return redirect()
@@ -185,7 +189,6 @@ PROMPT;
                 ->with('error', 'You already have an entry for today. Edit it instead.');
         }
         
-        // Create mood entry
         $entry = MoodEntry::create([
             'user_id' => $user->id,
             'entry_date' => now()->toDateString(),
@@ -194,7 +197,6 @@ PROMPT;
             'sleep_hours' => $request->sleep_hours,
         ]);
         
-        // Attach feelings
         if ($request->has('feelings')) {
             $entry->feelings()->attach($request->feelings);
         }
@@ -211,12 +213,10 @@ PROMPT;
     {
         $entry = MoodEntry::with('feelings')->findOrFail($id);
         
-        // Only allow editing own entries
         if ($entry->user_id !== Auth::id()) {
             abort(403);
         }
         
-        // Only allow editing today's entry
         if (!$entry->isEditable()) {
             return redirect()
                 ->route('dashboard')
@@ -235,12 +235,10 @@ PROMPT;
     {
         $entry = MoodEntry::findOrFail($id);
         
-        // Only allow editing own entries
         if ($entry->user_id !== Auth::id()) {
             abort(403);
         }
         
-        // Only allow editing today's entry
         if (!$entry->isEditable()) {
             return redirect()
                 ->route('dashboard')
@@ -261,7 +259,6 @@ PROMPT;
             'sleep_hours' => $request->sleep_hours,
         ]);
         
-        // Sync feelings
         if ($request->has('feelings')) {
             $entry->feelings()->sync($request->feelings);
         } else {
