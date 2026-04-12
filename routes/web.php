@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MoodEntryController;
 use App\Http\Controllers\QuoteController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AnalyticsController;
 
 Route::get('/', fn() => redirect()->route('login'));
 
@@ -31,6 +32,9 @@ Route::middleware('auth')->group(function () {
 
     // AI Quote — called via AJAX from dashboard / mood form
     Route::post('/quote/generate', [QuoteController::class, 'generate'])->name('quote.generate');
+
+    // analytics
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
     Route::get('/profile', fn() => view('profile'))->name('profile');
 });

@@ -1,0 +1,193 @@
+
+
+.analytics-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+}
+
+/* ── Page header ── */
+.analytics-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Period selector */
+.period-selector {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.period-btn {
+  font-size: 0.78rem;
+  font-family: 'DM Sans', sans-serif;
+  color: rgba(169,180,194,0.55);
+  text-decoration: none;
+  padding: 5px 16px;
+  border-radius: 999px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.period-btn:hover  { color: #f0e6ee; background: rgba(255,255,255,0.06); }
+.period-btn.active { background: linear-gradient(135deg,#c0587a,#7c3fa0); color:#fff; }
+
+/* ── Stats strip ── */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  padding: 1.5rem 1.6rem;
+  opacity: 0;
+  animation: float-up 0.6s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+.stat-icon  { font-size: 1.4rem; margin-bottom: .6rem; }
+
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  color: #f0e6ee;
+  line-height: 1;
+  margin-bottom: .3rem;
+}
+
+.stat-unit  { font-size: 1rem; color: var(--bloom); font-family: 'DM Sans', sans-serif; }
+.stat-label { font-size: 0.78rem; color: rgba(169,180,194,0.7); margin-bottom: .2rem; }
+.stat-sub   { font-size: 0.68rem; color: rgba(169,180,194,0.38); }
+
+/* ── Streak dots ── */
+.streak-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 1rem;
+}
+
+.streak-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: transform 0.2s;
+  cursor: default;
+}
+
+.streak-dot.filled {
+  background: linear-gradient(135deg, #c0587a, #7c3fa0);
+  border-color: transparent;
+  box-shadow: 0 0 6px rgba(192,88,122,0.5);
+}
+
+.streak-dots-label {
+  font-size: 0.62rem;
+  color: rgba(169,180,194,0.3);
+  margin-top: 5px;
+  letter-spacing: 0.06em;
+}
+
+/* ── Charts grid ── */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.chart-card {
+  padding: 1.6rem 1.8rem;
+  opacity: 0;
+  animation: float-up 0.6s cubic-bezier(.22,1,.36,1) forwards;
+}
+
+/* Mood evolution spans full width */
+.chart-wide { grid-column: 1 / -1; }
+
+/* ── Card head ── */
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  color: #f0e6ee;
+  margin-bottom: .2rem;
+}
+
+.card-sub {
+  font-size: 0.75rem;
+  color: rgba(169,180,194,0.45);
+}
+
+/* ── Chart canvas wrapper ── */
+.chart-wrap { position: relative; height: 240px; }
+.chart-wide .chart-wrap { height: 280px; }
+
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 0.85rem;
+  color: rgba(169,180,194,0.35);
+  text-align: center;
+}
+
+/* ── Feelings legend chips ── */
+.feelings-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.feeling-chip-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+/* ── Best day badge ── */
+.best-day-badge {
+  font-size: 0.8rem;
+  color: rgba(169,180,194,0.6);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin-bottom: 1rem;
+}
+
+.best-day-badge strong { color: var(--bloom); }
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .analytics-grid { grid-template-columns: 1fr; }
+  .chart-wide     { grid-column: auto; }
+  .stats-strip    { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 540px) {
+  .analytics-container { padding: 1rem 1rem 3rem; }
+  .stats-strip         { grid-template-columns: 1fr; }
+  .analytics-header    { flex-direction: column; align-items: flex-start; }
+}

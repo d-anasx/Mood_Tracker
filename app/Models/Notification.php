@@ -17,12 +17,12 @@ class Notification extends Model
         'title',
         'message',
         'is_read',
-        'sent_at',
+        'created_at',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
-        'sent_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     // -------------------------------------------------------

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Sign In')
-
+@section('hideNav', true)
 {{-- Override orbs for the login page colour scheme --}}
 @section('orbs')
   <div class="orb orb-purple"></div>

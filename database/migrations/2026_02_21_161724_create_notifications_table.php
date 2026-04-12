@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('message');
             $table->boolean('is_read')->default(false);
-            $table->timestamp('sent_at')->nullable();
+            $table->timestamps();
 
             $table->index('user_id');
         });

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Create Account')
-
+@section('hideNav', true)
 {{-- Teal-tinted orbs for the register page --}}
 @section('orbs')
   <div class="orb orb-purple"></div>

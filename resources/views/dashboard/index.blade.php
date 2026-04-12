@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
-
 @section('orbs')
     <div class="orb orb-purple"></div>
     <div class="orb orb-rose"></div>
@@ -14,271 +13,235 @@
 
 @section('content')
 
-    <div class="dashboard-page">
+
+    <div class="dash-container">
 
         {{-- ══════════════════════════════════════
-       TOP NAV — user info + logout
-  ══════════════════════════════════════ --}}
-        <nav class="dash-nav">
-            <div class="dash-nav-left">
-                <div class="nav-logo flex justify-center">
-                    <img class="w-16 animate-pulse" src="{{ asset('assets/Mood_Tracker.png') }}" alt="">
-                    <span class="nav-logo-text">MoodTrace</span>
-                </div>
+        HEADER — Welcome + Today's Check-in CTA
+        ══════════════════════════════════════ --}}
+        <header class="dash-header">
+            <div class="dash-welcome">
+                <h1 class="dash-title">
+                    Welcome back, <span class="name-highlight">{{ explode(' ', $user->name)[0] }}</span>
+                </h1>
+                <p class="dash-subtitle">
+                    {{ now()->format('l, F j, Y') }}
+                </p>
             </div>
 
-            <div class="dash-nav-right">
-                <div class="nav-user">
-                    <span class="nav-avatar">{{ $user->avatar }}</span>
-                    <div class="nav-user-info">
-                        <div class="nav-user-name">{{ $user->name }}</div>
-                        <div class="nav-user-role">{{ $user->role->name }}</div>
-                    </div>
+            @if (!$todayEntry)
+                <a href="{{ route('mood.create') }}" class="btn-checkin">
+                    <span class="btn-icon">✨</span>
+                    Log Today's Mood
+                </a>
+            @else
+                <div class="today-badge">
+                    <span class="badge-icon">✓</span>
+                    Logged today
                 </div>
+            @endif
+        </header>
 
-                @if ($unreadCount > 0)
-                    <a href="#" class="nav-notif" aria-label="Notifications">
-                        <span class="notif-icon">🔔</span>
-                        <span class="notif-badge">{{ $unreadCount }}</span>
-                    </a>
-                @endif
+        {{-- ══════════════════════════════════════
+        MAIN GRID — Cards layout
+        ══════════════════════════════════════ --}}
+        <div class="dash-grid">
 
-                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="nav-logout">Logout</button>
-                </form>
-            </div>
-        </nav>
-
-        <div class="dash-container">
-
-            {{-- ══════════════════════════════════════
-         HEADER — Welcome + Today's Check-in CTA
-    ══════════════════════════════════════ --}}
-            <header class="dash-header">
-                <div class="dash-welcome">
-                    <h1 class="dash-title">
-                        Welcome back, <span class="name-highlight">{{ explode(' ', $user->name)[0] }}</span>
-                    </h1>
-                    <p class="dash-subtitle">
-                        {{ now()->format('l, F j, Y') }}
-                    </p>
-                </div>
-
-                @if (!$todayEntry)
-                    <a href="{{ route('mood.create') }}" class="btn-checkin">
-                        <span class="btn-icon">✨</span>
-                        Log Today's Mood
-                    </a>
-                @else
-                    <div class="today-badge">
-                        <span class="badge-icon">✓</span>
-                        Logged today
-                    </div>
-                @endif
-            </header>
-
-            {{-- ══════════════════════════════════════
-         MAIN GRID — Cards layout
-    ══════════════════════════════════════ --}}
-            <div class="dash-grid">
-
-                {{-- ── TODAY'S ENTRY CARD ── --}}
-                @if ($todayEntry)
-                    <div class="glass-card card-today p-5">
-                        <div class="card-header">
-                            <h2 class="card-title">Today's Check-in</h2>
-                            <a href="{{ route('mood.edit', $todayEntry->id) }}" class="card-action">Edit</a>
-                        </div>
-
-                        <div class="today-mood">
-                            <div class="mood-level-display">
-                                <div class="mood-number">{{ $todayEntry->mood_level }}</div>
-                                <div class="mood-scale">/10</div>
-                            </div>
-                            <div class="mood-meta">
-                                <div class="mood-time">{{ $todayEntry->created_at->format('g:i A') }}</div>
-                                @if ($todayEntry->sleep_hours)
-                                    <div class="mood-sleep">💤 {{ $todayEntry->sleep_hours }}h sleep</div>
-                                @endif
-                            </div>
-                        </div>
-
-                        @if ($todayEntry->feelings->count() > 0)
-                            <div class="feelings-row">
-                                @foreach ($todayEntry->feelings as $feeling)
-                                    <span class="feeling-chip"
-                                        style="background: {{ $feeling->color }}20; color: {{ $feeling->color }};">
-                                        {{ $feeling->icon }} {{ $feeling->name }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        @endif
-
-                        @if ($todayEntry->reflection)
-                            <div class="reflection-box">
-                                <div class="reflection-label">Your reflection</div>
-                                <p class="reflection-text">{{ $todayEntry->reflection }}</p>
-                            </div>
-                        @endif
-                    </div>
-                @else
-                    <div class="glass-card card-empty flex flex-col justify-center items-center">
-                        <div class="empty-icon">📝</div>
-                        <h3 class="empty-title">No entry yet today</h3>
-                        <p class="empty-text">Take a moment to check in with yourself.</p>
-                        <a href="{{ route('mood.create') }}" class="btn-primary w-1/6 ">
-                            Log Your Mood
-                        </a>
-                    </div>
-                @endif
-
-                {{-- ── MOOD CHART CARD ── --}}
-                <div class="glass-card card-chart p-5">
+            {{-- ── TODAY'S ENTRY CARD ── --}}
+            @if ($todayEntry)
+                <div class="glass-card card-today p-5">
                     <div class="card-header">
-                        <h2 class="card-title">Your Journey</h2>
-                        <div class="card-legend">
-                            <span class="legend-item">
-                                <span class="legend-dot" style="background: var(--accent-purple);"></span>
-                                Mood Level
-                            </span>
+                        <h2 class="card-title">Today's Check-in</h2>
+                        <a href="{{ route('mood.edit', $todayEntry->id) }}" class="card-action">Edit</a>
+                    </div>
+
+                    <div class="today-mood">
+                        <div class="mood-level-display">
+                            <div class="mood-number">{{ $todayEntry->mood_level }}</div>
+                            <div class="mood-scale">/10</div>
+                        </div>
+                        <div class="mood-meta">
+                            <div class="mood-time">{{ $todayEntry->created_at->format('g:i A') }}</div>
+                            @if ($todayEntry->sleep_hours)
+                                <div class="mood-sleep">💤 {{ $todayEntry->sleep_hours }}h sleep</div>
+                            @endif
                         </div>
                     </div>
 
-                    @if ($recentEntries->count() > 0)
-                        <div class="chart-container">
-                            <canvas id="moodChart"></canvas>
+                    @if ($todayEntry->feelings->count() > 0)
+                        <div class="feelings-row">
+                            @foreach ($todayEntry->feelings as $feeling)
+                                <span class="feeling-chip" style="background: {{ $feeling->color }}20; color: {{ $feeling->color }};">
+                                    {{ $feeling->icon }} {{ $feeling->name }}
+                                </span>
+                            @endforeach
                         </div>
-                    @else
-                        <div class="chart-empty">
-                            <p>Start logging your mood to see your journey over time.</p>
+                    @endif
+
+                    @if ($todayEntry->reflection)
+                        <div class="reflection-box">
+                            <div class="reflection-label">Your reflection</div>
+                            <p class="reflection-text">{{ $todayEntry->reflection }}</p>
                         </div>
                     @endif
                 </div>
+            @else
+                <div class="glass-card card-empty flex flex-col justify-center items-center">
+                    <div class="empty-icon">📝</div>
+                    <h3 class="empty-title">No entry yet today</h3>
+                    <p class="empty-text">Take a moment to check in with yourself.</p>
+                    <a href="{{ route('mood.create') }}" class="btn-primary w-1/6 ">
+                        Log Your Mood
+                    </a>
+                </div>
+            @endif
 
-                {{-- ── TREND COMPARISON CARD ── --}}
-                @if ($trendData)
-                    <div class="glass-card card-trend p-5">
-                        <div class="card-header">
-                            <h2 class="card-title">Your Trends</h2>
-                            <div class="card-subtitle">Last 5 vs Previous 5 entries</div>
-                        </div>
-
-                        <div class="trend-grid">
-                            <div class="trend-item">
-                                <div class="trend-label">Mood Average</div>
-                                <div class="trend-value">
-                                    {{ $trendData['mood']['recent'] }}
-                                    @if ($trendData['mood']['trend'] === 'up')
-                                        <span class="trend-arrow trend-up">↑</span>
-                                    @elseif($trendData['mood']['trend'] === 'down')
-                                        <span class="trend-arrow trend-down">↓</span>
-                                    @else
-                                        <span class="trend-arrow trend-stable">→</span>
-                                    @endif
-                                </div>
-                                <div class="trend-change {{ $trendData['mood']['trend'] }}">
-                                    {{ $trendData['mood']['change'] > 0 ? '+' : '' }}{{ $trendData['mood']['change'] }}
-                                    from previous
-                                </div>
-                            </div>
-
-                            <div class="trend-item">
-                                <div class="trend-label">Sleep Average</div>
-                                <div class="trend-value">
-                                    {{ $trendData['sleep']['recent'] }}h
-                                    @if ($trendData['sleep']['trend'] === 'up')
-                                        <span class="trend-arrow trend-up">↑</span>
-                                    @elseif($trendData['sleep']['trend'] === 'down')
-                                        <span class="trend-arrow trend-down">↓</span>
-                                    @else
-                                        <span class="trend-arrow trend-stable">→</span>
-                                    @endif
-                                </div>
-                                <div class="trend-change {{ $trendData['sleep']['trend'] }}">
-                                    {{ $trendData['sleep']['change'] > 0 ? '+' : '' }}{{ $trendData['sleep']['change'] }}h
-                                    from previous
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- ── MOTIVATIONAL QUOTE CARD ── --}}
-                @if ($quote)
-                    <div class="glass-card card-quote" id="quoteCard">
-
-                        <div class="quote-header">
-                            <div class="quote-icon">💭</div>
-                            @if ($quoteSource === 'ai')
-                                <span class="quote-badge ai-badge">✨ AI Generated</span>
-                            @else
-                                <span class="quote-badge db-badge">📚 Curated</span>
-                            @endif
-                        </div>
-
-                        <blockquote class="quote-text" id="quoteText">
-                            "{{ $quote->text }}"
-                        </blockquote>
-
-                        <div class="quote-footer">
-                            @if ($quote->author)
-                                <cite class="quote-author" id="quoteAuthor">— {{ $quote->author }}</cite>
-                            @endif
-
-                            {{-- Regenerate button — calls Gemini via AJAX --}}
-                            @if ($todayEntry)
-                                <button class="quote-refresh" id="refreshQuote" title="Generate new quote"
-                                    data-mood="{{ $todayEntry->mood_level }}"
-                                    data-feelings="{{ $todayEntry->feelings->pluck('name')->join(',') }}"
-                                    data-reflection="{{ $todayEntry->reflection }}">
-                                    <span id="refreshIcon">↻</span>
-                                </button>
-                            @endif
-                        </div>
-
-                    </div>
-                @endif
-
-                {{-- ── QUICK STATS CARD ── --}}
-                <div class="glass-card card-stats p-6">
-                    <div class="card-header">
-                        <h2 class="card-title">Quick Stats</h2>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-number">{{ $user->moodEntries()->count() }}</div>
-                            <div class="stat-label">Total Entries</div>
-                        </div>
-
-                        <div class="stat-item">
-                            <div class="stat-number">
-                                {{ $user->moodEntries()->where('entry_date', '>=', now()->subDays(7))->count() }}</div>
-                            <div class="stat-label">This Week</div>
-                        </div>
-
-                        <div class="stat-item">
-                            <div class="stat-number">
-                                {{ $user->moodEntries()->count() > 0 ? round($user->moodEntries()->avg('mood_level'), 1) : '—' }}
-                            </div>
-                            <div class="stat-label">Avg Mood</div>
-                        </div>
-
-                        <div class="stat-item">
-                            <div class="stat-number">
-                                {{ $user->moodEntries()->whereNotNull('sleep_hours')->count() > 0 ? round($user->moodEntries()->avg('sleep_hours'), 1) . 'h' : '—' }}
-                            </div>
-                            <div class="stat-label">Avg Sleep</div>
-                        </div>
+            {{-- ── MOOD CHART CARD ── --}}
+            <div class="glass-card card-chart p-5">
+                <div class="card-header">
+                    <h2 class="card-title">Your Journey</h2>
+                    <div class="card-legend">
+                        <span class="legend-item">
+                            <span class="legend-dot" style="background: var(--accent-purple);"></span>
+                            Mood Level
+                        </span>
                     </div>
                 </div>
 
-            </div>{{-- /dash-grid --}}
+                @if ($recentEntries->count() > 0)
+                    <div class="chart-container">
+                        <canvas id="moodChart"></canvas>
+                    </div>
+                @else
+                    <div class="chart-empty">
+                        <p>Start logging your mood to see your journey over time.</p>
+                    </div>
+                @endif
+            </div>
 
-        </div>{{-- /dash-container --}}
+            {{-- ── TREND COMPARISON CARD ── --}}
+            @if ($trendData)
+                <div class="glass-card card-trend p-5">
+                    <div class="card-header">
+                        <h2 class="card-title">Your Trends</h2>
+                        <div class="card-subtitle">Last 5 vs Previous 5 entries</div>
+                    </div>
 
-    </div>{{-- /dashboard-page --}}
+                    <div class="trend-grid">
+                        <div class="trend-item">
+                            <div class="trend-label">Mood Average</div>
+                            <div class="trend-value">
+                                {{ $trendData['mood']['recent'] }}
+                                @if ($trendData['mood']['trend'] === 'up')
+                                    <span class="trend-arrow trend-up">↑</span>
+                                @elseif($trendData['mood']['trend'] === 'down')
+                                    <span class="trend-arrow trend-down">↓</span>
+                                @else
+                                    <span class="trend-arrow trend-stable">→</span>
+                                @endif
+                            </div>
+                            <div class="trend-change {{ $trendData['mood']['trend'] }}">
+                                {{ $trendData['mood']['change'] > 0 ? '+' : '' }}{{ $trendData['mood']['change'] }}
+                                from previous
+                            </div>
+                        </div>
+
+                        <div class="trend-item">
+                            <div class="trend-label">Sleep Average</div>
+                            <div class="trend-value">
+                                {{ $trendData['sleep']['recent'] }}h
+                                @if ($trendData['sleep']['trend'] === 'up')
+                                    <span class="trend-arrow trend-up">↑</span>
+                                @elseif($trendData['sleep']['trend'] === 'down')
+                                    <span class="trend-arrow trend-down">↓</span>
+                                @else
+                                    <span class="trend-arrow trend-stable">→</span>
+                                @endif
+                            </div>
+                            <div class="trend-change {{ $trendData['sleep']['trend'] }}">
+                                {{ $trendData['sleep']['change'] > 0 ? '+' : '' }}{{ $trendData['sleep']['change'] }}h
+                                from previous
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- ── MOTIVATIONAL QUOTE CARD ── --}}
+            @if ($quote)
+                <div class="glass-card card-quote" id="quoteCard">
+
+                    <div class="quote-header">
+                        <div class="quote-icon">💭</div>
+                        @if ($quoteSource === 'ai')
+                            <span class="quote-badge ai-badge">✨ AI Generated</span>
+                        @else
+                            <span class="quote-badge db-badge">📚 Curated</span>
+                        @endif
+                    </div>
+
+                    <blockquote class="quote-text" id="quoteText">
+                        "{{ $quote->text }}"
+                    </blockquote>
+
+                    <div class="quote-footer">
+                        @if ($quote->author)
+                            <cite class="quote-author" id="quoteAuthor">— {{ $quote->author }}</cite>
+                        @endif
+
+                        {{-- Regenerate button — calls Gemini via AJAX --}}
+                        @if ($todayEntry)
+                            <button class="quote-refresh" id="refreshQuote" title="Generate new quote"
+                                data-mood="{{ $todayEntry->mood_level }}"
+                                data-feelings="{{ $todayEntry->feelings->pluck('name')->join(',') }}"
+                                data-reflection="{{ $todayEntry->reflection }}">
+                                <span id="refreshIcon">↻</span>
+                            </button>
+                        @endif
+                    </div>
+
+                </div>
+            @endif
+
+            {{-- ── QUICK STATS CARD ── --}}
+            <div class="glass-card card-stats p-6">
+                <div class="card-header">
+                    <h2 class="card-title">Quick Stats</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ $user->moodEntries()->count() }}</div>
+                        <div class="stat-label">Total Entries</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-number">
+                            {{ $user->moodEntries()->where('entry_date', '>=', now()->subDays(7))->count() }}
+                        </div>
+                        <div class="stat-label">This Week</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-number">
+                            {{ $user->moodEntries()->count() > 0 ? round($user->moodEntries()->avg('mood_level'), 1) : '—' }}
+                        </div>
+                        <div class="stat-label">Avg Mood</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-number">
+                            {{ $user->moodEntries()->whereNotNull('sleep_hours')->count() > 0 ? round($user->moodEntries()->avg('sleep_hours'), 1) . 'h' : '—' }}
+                        </div>
+                        <div class="stat-label">Avg Sleep</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>{{-- /dash-grid --}}
+
+    </div>{{-- /dash-container --}}
+
 
 @endsection
 
@@ -380,8 +343,7 @@
 
                     try {
                         const feelings = btn.dataset.feelings ?
-                            btn.dataset.feelings.split(',').filter(Boolean) :
-                            [];
+                            btn.dataset.feelings.split(',').filter(Boolean) : [];
 
                         const res = await fetch('{{ route('quote.generate') }}', {
                             method: 'POST',
