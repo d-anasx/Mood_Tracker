@@ -1,128 +1,206 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Entry')
+@section('title', 'Edit Your Mood Entry')
+
+@section('orbs')
+  <div class="orb orb-purple"></div>
+  <div class="orb orb-teal"></div>
+  <div class="orb orb-rose" style="opacity:0.3;"></div>
+@endsection
 
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('css/mood-form.css') }}"/>
+  <link rel="stylesheet" href="{{ asset('css/mood-entry.css') }}"/>
 @endpush
 
 @section('content')
 
-<div class="mood-page">
+<div class="mood-entry-page">
+  
+  {{-- Back to dashboard --}}
+  <a href="{{ route('dashboard') }}" class="back-link">
+    ← Back to Dashboard
+  </a>
 
-  <div class="mood-card glass-card">
-
-    <div class="mood-card-header">
-      <a href="{{ route('dashboard') }}" class="back-link">← Dashboard</a>
-      <div class="eyebrow">{{ \Carbon\Carbon::parse($moodEntry->entry_date)->format('l, F j') }}</div>
-      <h1 class="display-title" style="font-size:1.9rem;">Edit your check-in</h1>
-      <p class="muted" style="margin-top:.3rem;font-size:.88rem;">You can edit today's entry until midnight.</p>
+  <div class="glass-card entry-card">
+    
+    <div class="entry-header">
+      <div class="header-icon">✏️</div>
+      <h1 class="entry-title">Edit Your Mood Entry</h1>
+      <p class="entry-subtitle">{{ \Carbon\Carbon::parse($entry->entry_date)->format('l, F j, Y') }}</p>
     </div>
 
-    <form action="{{ route('mood.update', $moodEntry->id) }}" method="POST" id="moodForm">
+    <form action="{{ route('mood.update', $entry->id) }}" method="POST" id="moodEntryForm">
       @csrf
-      @method('PATCH')
+      @method('PUT')
 
-      {{-- ── MOOD LEVEL ── --}}
+      {{-- ══════════════════════════════════════
+           MOOD LEVEL
+      ══════════════════════════════════════ --}}
       <div class="form-section">
-        <label class="section-label">Mood Level</label>
-        <div class="mood-slider-wrap">
-          <div class="slider-emojis">
-            <span>😞</span><span>😐</span><span>😊</span><span>🤩</span>
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">📊</span>
+            Mood Level
+          </h2>
+          <p class="section-subtitle">Rate your overall mood from 1 (very low) to 10 (excellent)</p>
+        </div>
+
+        <div class="mood-slider-container">
+          <input 
+            type="range" 
+            id="moodSlider" 
+            name="mood_level" 
+            min="1" 
+            max="10" 
+            value="{{ old('mood_level', $entry->mood_level) }}"
+            required
+            class="mood-slider"
+          />
+          <div class="mood-value-display">
+            <span class="mood-number" id="moodValue">{{ old('mood_level', $entry->mood_level) }}</span>
+            <span class="mood-label" id="moodLabel">Good</span>
           </div>
-          <input type="range" name="mood_level" id="moodLevel"
-            min="1" max="10"
-            value="{{ old('mood_level', $moodEntry->mood_level) }}"
-            class="mood-range" oninput="updateMoodDisplay(this.value)"/>
-          <div class="slider-labels">
-            <span>1</span><span>5</span><span>10</span>
+          <div class="mood-scale-labels">
+            <span>1 - Very Low</span>
+            <span>10 - Excellent</span>
           </div>
         </div>
-        <div class="mood-level-badge" id="moodBadge">
-          <span id="moodNum">{{ old('mood_level', $moodEntry->mood_level) }}</span>
-          <span class="mood-badge-label" id="moodLabel"></span>
-        </div>
-        @error('mood_level') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
       </div>
 
-      {{-- ── FEELINGS ── --}}
+      {{-- ══════════════════════════════════════
+           FEELINGS
+      ══════════════════════════════════════ --}}
       <div class="form-section">
-        <label class="section-label">Feelings <span class="optional">(optional)</span></label>
-        <div class="feelings-picker">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">💭</span>
+            Select Your Feelings
+          </h2>
+          <p class="section-subtitle">Choose all that apply (optional)</p>
+        </div>
+
+        <div class="feelings-grid">
+          @php
+            $selectedFeelingIds = old('feelings', $entry->feelings->pluck('id')->toArray());
+          @endphp
           @foreach($feelings as $feeling)
-          <label class="feeling-toggle">
-            <input type="checkbox" name="feelings[]" value="{{ $feeling->id }}"
-              {{ $moodEntry->feelings->contains($feeling->id) || in_array($feeling->id, old('feelings', [])) ? 'checked' : '' }}/>
-            <span class="feeling-chip-opt" style="--chip-color: {{ $feeling->color }};">
-              {{ $feeling->icon }} {{ $feeling->name }}
-            </span>
+          <label class="feeling-card" data-feeling-id="{{ $feeling->id }}">
+            <input 
+              type="checkbox" 
+              name="feelings[]" 
+              value="{{ $feeling->id }}"
+              class="feeling-checkbox"
+              {{ in_array($feeling->id, $selectedFeelingIds) ? 'checked' : '' }}
+            />
+            <span class="feeling-icon" style="color: {{ $feeling->color }};">{{ $feeling->icon }}</span>
+            <span class="feeling-name">{{ $feeling->name }}</span>
+            <span class="feeling-check">✓</span>
           </label>
           @endforeach
         </div>
       </div>
 
-      {{-- ── SLEEP HOURS ── --}}
+      {{-- ══════════════════════════════════════
+           ADDITIONAL DETAILS
+      ══════════════════════════════════════ --}}
       <div class="form-section">
-        <label class="section-label" for="sleepHours">Sleep Hours <span class="optional">(optional)</span></label>
-        <div class="field" style="margin-bottom:0;">
-          <input type="number" id="sleepHours" name="sleep_hours"
-            placeholder="Hours slept"
-            min="0" max="24" step="0.5"
-            value="{{ old('sleep_hours', $moodEntry->sleep_hours) }}"/>
-          <label for="sleepHours">Hours slept last night</label>
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">🌙</span>
+            Additional Details
+          </h2>
         </div>
-        @error('sleep_hours') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
+
+        <div class="field">
+          <label for="sleepHours" class="field-label">
+            💤 Hours of Sleep Last Night
+          </label>
+          <input 
+            type="number" 
+            id="sleepHours" 
+            name="sleep_hours" 
+            min="0" 
+            max="24" 
+            step="0.5"
+            placeholder="e.g., 7.5"
+            value="{{ old('sleep_hours', $entry->sleep_hours) }}"
+            class="sleep-input"
+          />
+        </div>
+
+        <div class="field">
+          <label for="reflection" class="field-label">
+            💬 Quick Reflection (optional)
+          </label>
+          <textarea 
+            id="reflection" 
+            name="reflection" 
+            rows="4"
+            maxlength="500"
+            placeholder="Any additional thoughts or notes..."
+            class="reflection-input"
+          >{{ old('reflection', $entry->reflection) }}</textarea>
+          <div class="char-count">
+            <span id="reflectionCount">{{ strlen(old('reflection', $entry->reflection ?? '')) }}</span> / 500
+          </div>
+        </div>
       </div>
 
-      {{-- ── REFLECTION ── --}}
-      <div class="form-section">
-        <label class="section-label" for="reflection">Reflection <span class="optional">(optional)</span></label>
-        <div class="textarea-wrap">
-          <textarea id="reflection" name="reflection"
-            placeholder="What's on your mind today?"
-            maxlength="500" rows="4"
-            oninput="updateCharCount(this)">{{ old('reflection', $moodEntry->reflection) }}</textarea>
-          <span class="char-count" id="charCount">
-            {{ strlen(old('reflection', $moodEntry->reflection ?? '')) }}/500
-          </span>
-        </div>
-        @error('reflection') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
-      </div>
-
+      {{-- ══════════════════════════════════════
+           SUBMIT
+      ══════════════════════════════════════ --}}
       <div class="form-actions">
-        <a href="{{ route('dashboard') }}" class="btn-ghost">Cancel</a>
-        <button type="submit" class="btn-primary" style="width:auto;padding:.9rem 2.2rem;">
-          Update Entry ✦
+        <a href="{{ route('dashboard') }}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary">
+          <span class="btn-icon">✓</span>
+          Update Entry
         </button>
       </div>
 
     </form>
-  </div>
-</div>
+
+  </div>{{-- /entry-card --}}
+
+</div>{{-- /mood-entry-page --}}
 
 @endsection
 
 @push('scripts')
-<script>
-  const moodLabels = {
-    1:'Very Low', 2:'Low', 3:'Below Average', 4:'Neutral Low',
-    5:'Neutral', 6:'Neutral High', 7:'Good', 8:'Great', 9:'Excellent', 10:'Outstanding'
-  };
-
-  function updateMoodDisplay(val) {
-    document.getElementById('moodNum').textContent   = val;
-    document.getElementById('moodLabel').textContent = moodLabels[val] || '';
-    const badge = document.getElementById('moodBadge');
-    const hue   = Math.round((val - 1) / 9 * 120);
-    badge.style.background  = `hsla(${hue}, 60%, 40%, 0.2)`;
-    badge.style.borderColor = `hsla(${hue}, 60%, 60%, 0.35)`;
-    badge.style.color       = `hsl(${hue}, 70%, 75%)`;
-  }
-
-  function updateCharCount(el) {
-    document.getElementById('charCount').textContent = el.value.length + '/500';
-  }
-
-  updateMoodDisplay(document.getElementById('moodLevel').value);
-</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const moodSlider = document.getElementById('moodSlider');
+      const moodValue = document.getElementById('moodValue');
+      const moodLabel = document.getElementById('moodLabel');
+      const reflectionInput = document.getElementById('reflection');
+      const reflectionCount = document.getElementById('reflectionCount');
+      const feelingCards = document.querySelectorAll('.feeling-card');
+      
+      const moodLabels = {
+        1: 'Very Low', 2: 'Low', 3: 'Poor', 4: 'Below Average', 5: 'Fair',
+        6: 'Okay', 7: 'Good', 8: 'Great', 9: 'Excellent', 10: 'Amazing'
+      };
+      
+      // Initialize mood label
+      moodLabel.textContent = moodLabels[parseInt(moodSlider.value)];
+      
+      moodSlider.addEventListener('input', () => {
+        const value = parseInt(moodSlider.value);
+        moodValue.textContent = value;
+        moodLabel.textContent = moodLabels[value];
+      });
+      
+      if (reflectionInput) {
+        reflectionInput.addEventListener('input', () => {
+          reflectionCount.textContent = reflectionInput.value.length;
+        });
+      }
+      
+      feelingCards.forEach(card => {
+        card.addEventListener('click', () => {
+          const checkbox = card.querySelector('.feeling-checkbox');
+          checkbox.checked = !checkbox.checked;
+        });
+      });
+    });
+  </script>
 @endpush

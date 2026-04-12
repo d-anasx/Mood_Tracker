@@ -2,131 +2,228 @@
 
 @section('title', 'Log Your Mood')
 
+@section('orbs')
+  <div class="orb orb-purple"></div>
+  <div class="orb orb-teal"></div>
+  <div class="orb orb-rose" style="opacity:0.3;"></div>
+@endsection
+
 @push('styles')
-  <link rel="stylesheet" href="{{ asset('css/mood-form.css') }}"/>
+  <link rel="stylesheet" href="{{ asset('css/mood-entry.css') }}"/>
 @endpush
 
 @section('content')
 
-<div class="mood-page">
+<div class="mood-entry-page">
+  
+  {{-- Back to dashboard --}}
+  <a href="{{ route('dashboard') }}" class="back-link">
+    ← Back to Dashboard
+  </a>
 
-  <div class="mood-card glass-card">
-
-    {{-- Header --}}
-    <div class="mood-card-header">
-      <a href="{{ route('dashboard') }}" class="back-link">← Dashboard</a>
-      <div class="eyebrow">{{ now()->format('l, F j') }}</div>
-      <h1 class="display-title" style="font-size:1.9rem;">How are you feeling today?</h1>
-      <p class="muted" style="margin-top:.3rem;font-size:.88rem;">Take a moment — this is your space.</p>
+  <div class="glass-card entry-card">
+    
+    <div class="entry-header">
+      <div class="header-icon">✨</div>
+      <h1 class="entry-title">How are you feeling today?</h1>
+      <p class="entry-subtitle">{{ now()->format('l, F j, Y') }}</p>
     </div>
 
-    <form action="{{ route('mood.store') }}" method="POST" id="moodForm">
+    <form action="{{ route('mood.store') }}" method="POST" id="moodEntryForm">
       @csrf
 
-      {{-- ── MOOD LEVEL ── --}}
+      {{-- ══════════════════════════════════════
+           STEP 1: Journal Entry (AI Analysis)
+      ══════════════════════════════════════ --}}
       <div class="form-section">
-        <label class="section-label">Mood Level</label>
-        <div class="mood-slider-wrap">
-          <div class="slider-emojis">
-            <span>😞</span><span>😐</span><span>😊</span><span>🤩</span>
-          </div>
-          <input type="range" name="mood_level" id="moodLevel"
-            min="1" max="10" value="{{ old('mood_level', 5) }}"
-            class="mood-range" oninput="updateMoodDisplay(this.value)"/>
-          <div class="slider-labels">
-            <span>1</span><span>5</span><span>10</span>
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">📝</span>
+            Your Journal
+          </h2>
+          <p class="section-subtitle">Write freely about your day, thoughts, or feelings</p>
+        </div>
+
+        <div class="field">
+          <textarea 
+            id="journalText" 
+            rows="6" 
+            placeholder="Today I felt..."
+            maxlength="2000"
+          ></textarea>
+          <div class="char-count">
+            <span id="charCount">0</span> / 2000
           </div>
         </div>
-        <div class="mood-level-badge" id="moodBadge">
-          <span id="moodNum">{{ old('mood_level', 5) }}</span>
-          <span class="mood-badge-label" id="moodLabel">Neutral</span>
+
+        <button type="button" id="analyzeBtn" class="btn-analyze" disabled>
+          <span class="btn-icon">🤖</span>
+          <span class="btn-text">Analyze with AI</span>
+          <span class="btn-loader" style="display:none;">
+            <span class="loader-dot"></span>
+            <span class="loader-dot"></span>
+            <span class="loader-dot"></span>
+          </span>
+        </button>
+
+        {{-- AI Analysis Result --}}
+        <div id="aiAnalysis" class="ai-analysis" style="display:none;">
+          <div class="analysis-header">
+            <span class="analysis-icon">✨</span>
+            <h3 class="analysis-title">AI Insights</h3>
+          </div>
+          
+          <div class="analysis-content">
+            <div class="insight-item">
+              <div class="insight-label">Emotional Tone</div>
+              <div class="insight-value" id="emotionalTone"></div>
+            </div>
+            
+            <div class="insight-item">
+              <div class="insight-label">Detected Emotions</div>
+              <div class="emotion-tags" id="detectedEmotions"></div>
+            </div>
+            
+            <div class="insight-item">
+              <div class="insight-label">Suggested Mood Level</div>
+              <div class="suggested-mood" id="suggestedMood"></div>
+            </div>
+            
+            <div class="insight-item advice-box">
+              <div class="insight-label">Personalized Advice</div>
+              <p class="advice-text" id="aiAdvice"></p>
+            </div>
+          </div>
         </div>
-        @error('mood_level') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
       </div>
 
-      {{-- ── FEELINGS ── --}}
+      {{-- ══════════════════════════════════════
+           STEP 2: Mood Level
+      ══════════════════════════════════════ --}}
       <div class="form-section">
-        <label class="section-label">Feelings <span class="optional">(optional)</span></label>
-        <div class="feelings-picker">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">📊</span>
+            Mood Level
+          </h2>
+          <p class="section-subtitle">Rate your overall mood from 1 (very low) to 10 (excellent)</p>
+        </div>
+
+        <div class="mood-slider-container">
+          <input 
+            type="range" 
+            id="moodSlider" 
+            name="mood_level" 
+            min="1" 
+            max="10" 
+            value="7"
+            required
+            class="mood-slider"
+          />
+          <div class="mood-value-display">
+            <span class="mood-number" id="moodValue">7</span>
+            <span class="mood-label" id="moodLabel">Good</span>
+          </div>
+          <div class="mood-scale-labels">
+            <span>1 - Very Low</span>
+            <span>10 - Excellent</span>
+          </div>
+        </div>
+      </div>
+
+      {{-- ══════════════════════════════════════
+           STEP 3: Feelings
+      ══════════════════════════════════════ --}}
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">💭</span>
+            Select Your Feelings
+          </h2>
+          <p class="section-subtitle">Choose all that apply (optional)</p>
+        </div>
+
+        <div class="feelings-grid">
           @foreach($feelings as $feeling)
-          <label class="feeling-toggle">
-            <input type="checkbox" name="feelings[]" value="{{ $feeling->id }}"
-              {{ in_array($feeling->id, old('feelings', [])) ? 'checked' : '' }}/>
-            <span class="feeling-chip-opt" style="--chip-color: {{ $feeling->color }};">
-              {{ $feeling->icon }} {{ $feeling->name }}
-            </span>
+          <label class="feeling-card" data-feeling-id="{{ $feeling->id }}">
+            <input 
+              type="checkbox" 
+              name="feelings[]" 
+              value="{{ $feeling->id }}"
+              class="feeling-checkbox"
+            />
+            <span class="feeling-icon" style="color: {{ $feeling->color }};">{{ $feeling->icon }}</span>
+            <span class="feeling-name">{{ $feeling->name }}</span>
+            <span class="feeling-check">✓</span>
           </label>
           @endforeach
         </div>
-        @error('feelings') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
       </div>
 
-      {{-- ── SLEEP HOURS ── --}}
+      {{-- ══════════════════════════════════════
+           STEP 4: Additional Details
+      ══════════════════════════════════════ --}}
       <div class="form-section">
-        <label class="section-label" for="sleepHours">Sleep Hours <span class="optional">(optional)</span></label>
-        <div class="field" style="margin-bottom:0;">
-          <input type="number" id="sleepHours" name="sleep_hours"
-            placeholder="Hours slept"
-            min="0" max="24" step="0.5"
-            value="{{ old('sleep_hours') }}"/>
-          <label for="sleepHours">Hours slept last night</label>
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="section-icon">🌙</span>
+            Additional Details
+          </h2>
         </div>
-        @error('sleep_hours') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
+
+        <div class="field">
+          <label for="sleepHours" class="field-label">
+            💤 Hours of Sleep Last Night
+          </label>
+          <input 
+            type="number" 
+            id="sleepHours" 
+            name="sleep_hours" 
+            min="0" 
+            max="24" 
+            step="0.5"
+            placeholder="e.g., 7.5"
+            class="sleep-input"
+          />
+        </div>
+
+        <div class="field">
+          <label for="reflection" class="field-label">
+            💬 Quick Reflection (optional)
+          </label>
+          <textarea 
+            id="reflection" 
+            name="reflection" 
+            rows="3"
+            maxlength="500"
+            placeholder="Any additional thoughts or notes..."
+            class="reflection-input"
+          ></textarea>
+          <div class="char-count">
+            <span id="reflectionCount">0</span> / 500
+          </div>
+        </div>
       </div>
 
-      {{-- ── REFLECTION ── --}}
-      <div class="form-section">
-        <label class="section-label" for="reflection">Reflection <span class="optional">(optional)</span></label>
-        <div class="textarea-wrap">
-          <textarea id="reflection" name="reflection"
-            placeholder="What's on your mind today?"
-            maxlength="500" rows="4"
-            oninput="updateCharCount(this)">{{ old('reflection') }}</textarea>
-          <span class="char-count" id="charCount">
-            {{ strlen(old('reflection', '')) }}/500
-          </span>
-        </div>
-        @error('reflection') <p class="field-error" style="display:block;">{{ $message }}</p> @enderror
-      </div>
-
-      {{-- ── ACTIONS ── --}}
+      {{-- ══════════════════════════════════════
+           SUBMIT
+      ══════════════════════════════════════ --}}
       <div class="form-actions">
-        <a href="{{ route('dashboard') }}" class="btn-ghost">Cancel</a>
-        <button type="submit" class="btn-primary" style="width:auto;padding:.9rem 2.2rem;">
-          Save Entry ✦
+        <a href="{{ route('dashboard') }}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary">
+          <span class="btn-icon">✓</span>
+          Save Mood Entry
         </button>
       </div>
 
     </form>
-  </div>
-</div>
+
+  </div>{{-- /entry-card --}}
+
+</div>{{-- /mood-entry-page --}}
 
 @endsection
 
 @push('scripts')
-<script>
-  const moodLabels = {
-    1:'Very Low', 2:'Low', 3:'Below Average', 4:'Neutral Low',
-    5:'Neutral', 6:'Neutral High', 7:'Good', 8:'Great', 9:'Excellent', 10:'Outstanding'
-  };
-
-  function updateMoodDisplay(val) {
-    document.getElementById('moodNum').textContent   = val;
-    document.getElementById('moodLabel').textContent = moodLabels[val] || '';
-
-    // Colour shift based on value
-    const badge = document.getElementById('moodBadge');
-    const hue   = Math.round((val - 1) / 9 * 120); // 0 = red, 120 = green
-    badge.style.background = `hsla(${hue}, 60%, 40%, 0.2)`;
-    badge.style.borderColor = `hsla(${hue}, 60%, 60%, 0.35)`;
-    badge.style.color = `hsl(${hue}, 70%, 75%)`;
-  }
-
-  function updateCharCount(el) {
-    document.getElementById('charCount').textContent = el.value.length + '/500';
-  }
-
-  // Init on load
-  updateMoodDisplay(document.getElementById('moodLevel').value);
-</script>
+  <script src="{{ asset('js/mood-entry.js') }}"></script>
 @endpush
