@@ -240,7 +240,7 @@
               <div class="max-h-[350px] overflow-y-auto custom-scrollbar">
                 @forelse($notifications as $notif)
                   <div
-                    class="p-4 border-b border-white/5 hover:bg-white/5 transitio n-colors cursor-pointer group {{ !$notif->is_read ? 'bg-bloom/5' : '' }}">
+                    class="p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group {{ !$notif->is_read ? 'bg-bloom/5' : '' }}">
                     <div class="flex justify-between items-start gap-2">
                       <span class="font-medium text-sm text-white group-hover:text-petal transition-colors">
                         {{ $notif->title ?? 'Notification' }}
@@ -265,32 +265,48 @@
             </div>
           </div>
 
-          {{-- User avatar dropdown remains here... --}}
-          <div class="relative" id="userWrap">
-            <button id="navUserBtn" class="nav-user p-2" aria-haspopup="true" aria-expanded="false">
-              <span class="user-avatar">
-                {{ auth()->user()->name }}
-              </span>
+          {{-- User avatar dropdown --}}
+          <div class="relative" id="navUserWrap">
+            <button id="navUserBtn"
+              class="nav-user-btn flex items-center gap-2 p-2 rounded-full transition-transform hover:scale-110"
+              aria-haspopup="true" aria-expanded="false">
               <span>
                 {{ auth()->user()->avatar }}
               </span>
+              <span class="user-name hidden sm:block">{{ auth()->user()->name }}</span>
+              <svg class="nav-chevron w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
             </button>
 
-            <div id="navDropdown" class="hidden absolute right-0 mt-3 w-48 bg-ink/95 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl z-50">
-              <div class="p-4 border-b border-white/5">
-                <h3 class="font-display text-petal font-bold">User Menu</h3>
+            {{-- User Dropdown - Only shows Logout --}}
+            <div id="navDropdown"
+              class="nav-dropdown hidden absolute right-0 mt-3 w-56 bg-ink/95 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl z-50 py-2"
+              aria-hidden="true">
+
+              {{-- User info header --}}
+              <div class="px-4 py-3 border-b border-white/10">
+                <p class="text-sm font-medium text-white">{{ auth()->user()->name }}</p>
+                <p class="text-xs text-mist mt-1">{{ auth()->user()->email }}</p>
               </div>
 
-              <div class="p-4">
-                <a href="{{ route('profile') }}" class="block text-sm text-white hover:text-petal">Profile</a>
-                <form action="{{ route('logout') }}" method="POST" class="mt-2">
-                  @csrf
-                  <button type="submit" class="block text-sm text-white hover:text-petal">Logout</button>
-                </form>
-              </div>
+              {{-- Divider --}}
+              <div class="border-t border-white/10 my-1"></div>
+
+              {{-- Logout only --}}
+              <form method="POST" action="{{ route('logout') }}" class="block">
+                @csrf
+                <button type="submit"
+                  class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                  </svg>
+                  Logout
+                </button>
+              </form>
             </div>
           </div>
-        </div>
       </nav>
     @endauth
   @endunless
@@ -306,76 +322,110 @@
        GLOBAL SCRIPTS
   ════════════════════════════════════════════ -->
   <script>
-    // ── Nav dropdown toggle ──
-    const btn = document.getElementById('navUserBtn');
-    const dropdown = document.getElementById('navDropdown');
-    const wrap = document.getElementById('navUserWrap');
+    document.addEventListener('DOMContentLoaded', function () {
 
-    if (btn && dropdown) {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = dropdown.classList.toggle('open');
-        btn.setAttribute('aria-expanded', open);
-        dropdown.setAttribute('aria-hidden', !open);
-      });
+      // --- User Dropdown Elements ---
+      const userBtn = document.getElementById('navUserBtn');
+      const userDropdown = document.getElementById('navDropdown');
 
-      // Close when clicking outside
-      document.addEventListener('click', () => {
-        dropdown.classList.remove('open');
-        btn.setAttribute('aria-expanded', false);
-        dropdown.setAttribute('aria-hidden', true);
-      });
-    }
+      // --- Notification Dropdown Elements ---
+      const notifBtn = document.getElementById('notifBtn');
+      const notifDropdown = document.getElementById('notifDropdown');
 
-    //notifications
-
-
-    document.addEventListener('DOMContentLoaded', function() {
-    // --- User Dropdown Elements ---
-    const userBtn = document.getElementById('navUserBtn');
-    const userDropdown = document.getElementById('navDropdown');
-
-    // --- Notification Dropdown Elements ---
-    const notifBtn = document.getElementById('notifBtn');
-    const notifDropdown = document.getElementById('notifDropdown');
-
-    // 1. Handle User Dropdown Toggle
-    if (userBtn && userDropdown) {
-      userBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Close notification dropdown if it's open
-        if (notifDropdown) notifDropdown.classList.add('hidden');
-        
-        const open = userDropdown.classList.toggle('open');
-        userBtn.setAttribute('aria-expanded', open);
-      });
-    }
-
-    // 2. Handle Notification Dropdown Toggle (Null-safe)
-    if (notifBtn && notifDropdown) {
-      notifBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Close user dropdown if it's open
-        if (userDropdown) userDropdown.classList.remove('open');
-        
-        notifDropdown.classList.toggle('hidden');
-      });
-    }
-
-    // 3. Global Click to Close Everything
-    document.addEventListener('click', (e) => {
-      // Close User Dropdown
-      if (userDropdown && !userBtn.contains(e.target)) {
-        userDropdown.classList.remove('open');
-        if (userBtn) userBtn.setAttribute('aria-expanded', false);
+      // Helper to close all dropdowns
+      function closeAllDropdowns() {
+        if (userDropdown) {
+          userDropdown.classList.remove('open');
+          userDropdown.classList.add('hidden');
+          if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
+        }
+        if (notifDropdown) {
+          notifDropdown.classList.add('hidden');
+        }
       }
 
-      // Close Notification Dropdown
-      if (notifDropdown && notifBtn && !notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
-        notifDropdown.classList.add('hidden');
+      // Helper to toggle user dropdown
+      function toggleUserDropdown(e) {
+        if (e) e.stopPropagation();
+
+        // Close notification dropdown first
+        if (notifDropdown && !notifDropdown.classList.contains('hidden')) {
+          notifDropdown.classList.add('hidden');
+        }
+
+        if (userDropdown) {
+          const isHidden = userDropdown.classList.contains('hidden');
+
+          // Reset state
+          userDropdown.classList.remove('open');
+
+          if (isHidden) {
+            // Show dropdown
+            userDropdown.classList.remove('hidden');
+            userDropdown.classList.add('open');
+            if (userBtn) userBtn.setAttribute('aria-expanded', 'true');
+          } else {
+            // Hide dropdown
+            userDropdown.classList.add('hidden');
+            if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
+          }
+        }
       }
+
+      // Toggle notification dropdown
+      function toggleNotifDropdown(e) {
+        if (e) e.stopPropagation();
+
+        // Close user dropdown first
+        if (userDropdown && !userDropdown.classList.contains('hidden')) {
+          userDropdown.classList.add('hidden');
+          userDropdown.classList.remove('open');
+          if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        if (notifDropdown) {
+          notifDropdown.classList.toggle('hidden');
+        }
+      }
+
+      // Attach event listeners
+      if (userBtn) {
+        userBtn.addEventListener('click', toggleUserDropdown);
+      }
+
+      if (notifBtn) {
+        notifBtn.addEventListener('click', toggleNotifDropdown);
+      }
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function (e) {
+        // Close user dropdown if clicking outside
+        if (userDropdown && userBtn && !userBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+          userDropdown.classList.add('hidden');
+          userDropdown.classList.remove('open');
+          if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        // Close notification dropdown if clicking outside
+        if (notifDropdown && notifBtn && !notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+          notifDropdown.classList.add('hidden');
+        }
+      });
+
+      // Prevent dropdown from closing when clicking inside
+      if (userDropdown) {
+        userDropdown.addEventListener('click', function (e) {
+          e.stopPropagation();
+        });
+      }
+
+      if (notifDropdown) {
+        notifDropdown.addEventListener('click', function (e) {
+          e.stopPropagation();
+        });
+      }
+
     });
-  });
   </script>
 
   @stack('scripts')
