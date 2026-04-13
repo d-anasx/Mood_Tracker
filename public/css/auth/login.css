@@ -234,3 +234,14 @@
   .login-left { display: none; }
   .vline      { display: none; }
 }
+
+/* Google Button */
+.btn-google {
+  transition: all 0.2s ease !important;
+}
+
+.btn-google:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(212, 165, 181, 0.25) !important;
+  transform: translateY(-1px);
+}

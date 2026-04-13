@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MoodEntryController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 
 // ── Redirect root to login ──
 Route::get('/', function () {
@@ -20,6 +21,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+
+    // Google OAuth routes
+    Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 });
 
 // ══════════════════════════════════════════════════════════
