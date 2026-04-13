@@ -172,9 +172,6 @@
         </div>
 
         <div class="field">
-          <label for="sleepHours" class="field-label">
-            💤 Hours of Sleep Last Night
-          </label>
           <input 
             type="number" 
             id="sleepHours" 
@@ -182,21 +179,18 @@
             min="0" 
             max="24" 
             step="0.5"
-            placeholder="e.g., 7.5"
+            placeholder="💤 Hours of Sleep Last Night"
             class="sleep-input"
           />
         </div>
 
         <div class="field">
-          <label for="reflection" class="field-label">
-            💬 Quick Reflection (optional)
-          </label>
           <textarea 
             id="reflection" 
             name="reflection" 
             rows="3"
             maxlength="500"
-            placeholder="Any additional thoughts or notes..."
+            placeholder="💬 Quick Reflection (Any additional thoughts or notes...)"
             class="reflection-input"
           ></textarea>
           <div class="char-count">

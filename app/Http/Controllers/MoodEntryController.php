@@ -4,13 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\MoodEntry;
 use App\Models\Feeling;
+use App\Services\GeminiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class MoodEntryController extends Controller
 {
+    /**
+     * Inject GeminiService to reuse the working API logic
+     */
+    public function __construct(private GeminiService $gemini)
+    {
+    }
+
     /**
      * Show the mood entry form.
      */
@@ -19,6 +27,7 @@ class MoodEntryController extends Controller
         $user = Auth::user();
         $todayEntry = $user->todayEntry();
         
+        // If entry exists today, redirect to edit
         if ($todayEntry) {
             return redirect()->route('mood.edit', $todayEntry->id);
         }
@@ -30,6 +39,7 @@ class MoodEntryController extends Controller
     
     /**
      * Analyze journal text with Gemini AI.
+     * Uses the GeminiService for all API communication.
      */
     public function analyzeJournal(Request $request)
     {
@@ -40,131 +50,25 @@ class MoodEntryController extends Controller
         $journalText = $request->journal_text;
         
         try {
-            $analysis = $this->callGeminiAPI($journalText);
+            // Call the GeminiService method we added
+            $analysis = $this->gemini->analyzeJournal($journalText);
             
+            if (!$analysis) {
+                throw new \Exception('Failed to analyze journal - no response from AI');
+            }
             return response()->json([
                 'success' => true,
                 'analysis' => $analysis,
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Gemini analysis failed: ' . $e->getMessage());
+            Log::error('Gemini analysis failed: ' . $e->getMessage());
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to analyze journal entry. Please try again.',
+                'message' => 'Failed to analyze journal entry: ' . $e->getMessage(),
             ], 500);
         }
-    }
-    
-    /**
-     * Call Gemini API for journal analysis.
-     */
-    private function callGeminiAPI($journalText)
-    {
-        // FIXED: Use config instead of env()
-        $apiKey = config('services.gemini.key');
-        
-        if (!$apiKey) {
-            throw new \Exception('Gemini API key not configured. Add GEMINI_API_KEY to .env');
-        }
-        
-        $prompt = $this->buildAnalysisPrompt($journalText);
-        
-        $response = Http::timeout(30)
-            ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
-                        ]
-                    ]
-                ],
-                'generationConfig' => [
-                    'temperature' => 0.7,
-                    'topK' => 40,
-                    'topP' => 0.95,
-                    'maxOutputTokens' => 1024,
-                ],
-            ]);
-        
-        if (!$response->successful()) {
-            throw new \Exception('Gemini API request failed: ' . $response->body());
-        }
-        
-        $data = $response->json();
-        
-        if (!isset($data['candidates'][0]['content']['parts'][0]['text'])) {
-            throw new \Exception('Invalid response from Gemini API');
-        }
-        
-        $aiResponse = $data['candidates'][0]['content']['parts'][0]['text'];
-        
-        return $this->parseGeminiResponse($aiResponse);
-    }
-    
-    /**
-     * Build the analysis prompt for Gemini.
-     */
-    private function buildAnalysisPrompt($journalText)
-    {
-        return <<<PROMPT
-You are an empathetic emotional wellness assistant for MoodTrace, a mood tracking app. 
-
-Analyze the following journal entry and provide a JSON response with this exact structure:
-
-{
-  "mood_level": <number 1-10>,
-  "emotional_tone": "<brief description>",
-  "detected_emotions": ["<emotion1>", "<emotion2>", "<emotion3>"],
-  "advice": "<personalized supportive advice in 2-3 sentences>",
-  "suggested_feelings": ["<feeling1>", "<feeling2>"]
-}
-
-Guidelines:
-- mood_level: 1 (very low/depressed) to 10 (euphoric/excellent). Be realistic, most entries are 4-7.
-- emotional_tone: One sentence summary of overall emotional state
-- detected_emotions: 3-5 key emotions present (e.g., "anxious", "hopeful", "frustrated", "grateful")
-- advice: Warm, supportive, actionable guidance. Acknowledge their feelings, then suggest one concrete step.
-- suggested_feelings: 2-3 feelings that match (choose from: Happy, Sad, Anxious, Calm, Excited, Tired, Grateful, Stressed, Hopeful, Frustrated, Content, Overwhelmed)
-
-Journal Entry:
-"""
-{$journalText}
-"""
-
-Respond ONLY with valid JSON, no markdown formatting or additional text.
-PROMPT;
-    }
-    
-    /**
-     * Parse Gemini's JSON response.
-     */
-    private function parseGeminiResponse($aiResponse)
-    {
-        // Remove markdown code blocks if present
-        $cleaned = preg_replace('/```json\s*|\s*```/', '', $aiResponse);
-        $cleaned = trim($cleaned);
-        
-        $parsed = json_decode($cleaned, true);
-        
-        if (!$parsed) {
-            throw new \Exception('Failed to parse AI response as JSON');
-        }
-        
-        // Validate structure
-        if (!isset($parsed['mood_level']) || !isset($parsed['advice'])) {
-            throw new \Exception('Invalid AI response structure');
-        }
-        
-        // Ensure mood_level is between 1-10
-        $parsed['mood_level'] = max(1, min(10, (int)$parsed['mood_level']));
-        
-        // Ensure suggested_feelings is an array
-        if (!isset($parsed['suggested_feelings']) || !is_array($parsed['suggested_feelings'])) {
-            $parsed['suggested_feelings'] = [];
-        }
-        
-        return $parsed;
     }
     
     /**
@@ -182,6 +86,7 @@ PROMPT;
         
         $user = Auth::user();
         
+        // Check if entry already exists today
         $existingEntry = $user->todayEntry();
         if ($existingEntry) {
             return redirect()
@@ -189,6 +94,7 @@ PROMPT;
                 ->with('error', 'You already have an entry for today. Edit it instead.');
         }
         
+        // Create mood entry
         $entry = MoodEntry::create([
             'user_id' => $user->id,
             'entry_date' => now()->toDateString(),
@@ -197,6 +103,7 @@ PROMPT;
             'sleep_hours' => $request->sleep_hours,
         ]);
         
+        // Attach feelings
         if ($request->has('feelings')) {
             $entry->feelings()->attach($request->feelings);
         }
@@ -213,10 +120,12 @@ PROMPT;
     {
         $entry = MoodEntry::with('feelings')->findOrFail($id);
         
+        // Only allow editing own entries
         if ($entry->user_id !== Auth::id()) {
             abort(403);
         }
         
+        // Only allow editing today's entry
         if (!$entry->isEditable()) {
             return redirect()
                 ->route('dashboard')
@@ -235,10 +144,12 @@ PROMPT;
     {
         $entry = MoodEntry::findOrFail($id);
         
+        // Only allow editing own entries
         if ($entry->user_id !== Auth::id()) {
             abort(403);
         }
         
+        // Only allow editing today's entry
         if (!$entry->isEditable()) {
             return redirect()
                 ->route('dashboard')
@@ -259,6 +170,7 @@ PROMPT;
             'sleep_hours' => $request->sleep_hours,
         ]);
         
+        // Sync feelings
         if ($request->has('feelings')) {
             $entry->feelings()->sync($request->feelings);
         } else {

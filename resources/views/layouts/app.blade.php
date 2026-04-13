@@ -266,6 +266,30 @@
           </div>
 
           {{-- User avatar dropdown remains here... --}}
+          <div class="relative" id="userWrap">
+            <button id="navUserBtn" class="nav-user p-2" aria-haspopup="true" aria-expanded="false">
+              <span class="user-avatar">
+                {{ auth()->user()->name }}
+              </span>
+              <span>
+                {{ auth()->user()->avatar }}
+              </span>
+            </button>
+
+            <div id="navDropdown" class="hidden absolute right-0 mt-3 w-48 bg-ink/95 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl z-50">
+              <div class="p-4 border-b border-white/5">
+                <h3 class="font-display text-petal font-bold">User Menu</h3>
+              </div>
+
+              <div class="p-4">
+                <a href="{{ route('profile') }}" class="block text-sm text-white hover:text-petal">Profile</a>
+                <form action="{{ route('logout') }}" method="POST" class="mt-2">
+                  @csrf
+                  <button type="submit" class="block text-sm text-white hover:text-petal">Logout</button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
       </nav>
     @endauth
