@@ -22,7 +22,7 @@
         <header class="dash-header">
             <div class="dash-welcome">
                 <h1 class="dash-title">
-                    Welcome back, <span class="name-highlight">{{ explode(' ', $user->name)[0] }}</span>
+                    Welcome back, <span class="name-highlight">{{ $user->name }}</span>
                 </h1>
                 <p class="dash-subtitle">
                     {{ now()->format('l, F j, Y') }}

@@ -1,3 +1,16 @@
+@if (session('success'))
+  <div class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50">
+    {{ session('success') }}
+  </div>
+
+@endif
+
+@if (session('error'))
+  <div class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50">
+    {{ session('error') }}
+  </div>
+
+@endif
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -223,7 +236,7 @@
               <span class="notif-icon text-xl">🔔</span>
               @if ($unreadCount > 0)
                 <span
-                  class="absolute top-1 right-1 bg-bloom text-ink text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border border-ink">
+                  class="absolute top-1 right-1 bg-bloom text-ink text-[7px] font-bold p-0.5 rounded-full min-w-[18px] text-center border border-ink">
                   {{ $unreadCount }}
                 </span>
               @endif

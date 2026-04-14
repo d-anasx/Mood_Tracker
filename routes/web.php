@@ -7,6 +7,9 @@ use App\Http\Controllers\MoodEntryController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\NotificationController;
 
 // ── Redirect root to login ──
 Route::get('/', function () {
@@ -60,7 +63,19 @@ Route::middleware('auth')->group(function () {
 // ADMIN ROUTES
 // ══════════════════════════════════════════════════════════
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/users', function() {
-        return 'Admin user management - coming soon';
-    })->name('users.index');
+    
+    // Dashboard
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    // User Management
+    Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/{id}', [UserManagementController::class, 'show'])->name('users.show');
+    Route::post('/users/{id}/approve', [UserManagementController::class, 'approve'])->name('users.approve');
+    Route::post('/users/{id}/block', [UserManagementController::class, 'block'])->name('users.block');
+    Route::post('/users/{id}/unblock', [UserManagementController::class, 'unblock'])->name('users.unblock');
+    Route::delete('/users/{id}', [UserManagementController::class, 'delete'])->name('users.delete');
+    
+    // Notifications
+    Route::get('/notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
+    Route::post('/notifications/send', [NotificationController::class, 'send'])->name('notifications.send');
 });
