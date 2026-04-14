@@ -222,10 +222,11 @@
 }
 
 .name-highlight {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-rose));
+  background: linear-gradient(139deg,#f2bdfd,#b51eb0);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  padding: 5px;
 }
 
 .dash-subtitle {

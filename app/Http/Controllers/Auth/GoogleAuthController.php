@@ -28,7 +28,7 @@ class GoogleAuthController extends Controller
             
             // Check if user exists by google_id
             $user = User::where('google_id', $googleUser->getId())->first();
-            
+
             if (!$user) {
                 // Check if user exists by email
                 $user = User::where('email', $googleUser->getEmail())->first();
@@ -37,12 +37,13 @@ class GoogleAuthController extends Controller
                     // User exists but didn't have google_id - link the account
                     $user->update(['google_id' => $googleUser->getId()]);
                 } else {
+                    dump('Creating new user with Google account');
                     // Create new user
                     $user = User::create([
                         'name' => $googleUser->getName(),
                         'email' => $googleUser->getEmail(),
                         'google_id' => $googleUser->getId(),
-                        'password' => Hash::make(Str::random(24)),
+                        'password' => Hash::make('password'),
                         'avatar' => $this->getRandomAvatar(),
                         'role_id' => 2, // User role
                         'status' => 'pending', // Requires admin approval
