@@ -16,23 +16,75 @@ class UserManagementController extends Controller
     {
         $query = User::with('role');
 
-        if ($request->has('status') && in_array($request->status, ['active', 'pending', 'blocked'])) {
-            $query->where('status', $request->status);
+        // Get filters from request
+        $status = $request->input('status', '');
+        $search = $request->input('search', '');
+        $page = $request->input('page', 1);
+
+        if ($status && in_array($status, ['active', 'pending', 'blocked'])) {
+            $query->where('status', $status);
         }
 
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
+        if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $users = $query->latest()->paginate(20);
+        $users = $query->latest()->paginate(20, ['*'], 'page', $page);
+        
+        // Check if AJAX request for real-time search/filter
+        if ($request->ajax()) {
+            $html = view('admin.users.partials.users-table', compact('users'))->render();
+            $pagination = view('admin.users.partials.pagination', compact('users'))->render();
+            
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'pagination' => $pagination,
+                'total' => $users->total()
+            ]);
+        }
 
         return view('admin.users.index', compact('users'));
     }
 
+     /**
+     * Handle AJAX search requests
+     */
+    public function search(Request $request)
+    {
+        $query = User::with('role');
+
+        $status = $request->input('status', '');
+        $search = $request->input('search', '');
+        $page = $request->input('page', 1);
+
+        if ($status && in_array($status, ['active', 'pending', 'blocked'])) {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->latest()->paginate(20, ['*'], 'page', $page);
+        
+        $html = view('admin.users.partials.users-table', compact('users'))->render();
+        $pagination = view('admin.users.partials.pagination', compact('users'))->render();
+        
+        return response()->json([
+            'success' => true,
+            'html' => $html,
+            'pagination' => $pagination,
+            'total' => $users->total()
+        ]);
+    }
+    
     public function show($id)
     {
         $user = User::with(['moodEntries' => function($q) {
