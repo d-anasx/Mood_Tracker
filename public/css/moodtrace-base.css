@@ -1,10 +1,12 @@
 
 
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap');
 /* ── Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: "Exo 2", sans-serif;
 }
 
 /* notifications */
@@ -38,7 +40,7 @@
 .app-nav {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -61,9 +63,10 @@
 .nav-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  flex-shrink: 0;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
 }
  
 .nav-logo-icon {
@@ -72,10 +75,10 @@
 }
  
 .nav-logo-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 1rem;
-  color: #f0e6ee;
-  white-space: nowrap;
+  background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
  
 /* Nav links */
@@ -165,7 +168,6 @@
   padding: 5px 12px 5px 6px;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
-  font-family: 'DM Sans', sans-serif;
 }
  
 .nav-user-btn:hover {
@@ -270,7 +272,6 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
   text-align: left;
   transition: background 0.15s, color 0.15s;
 }
@@ -332,7 +333,7 @@ main.relative {
 html, body {
   min-height: 100%;
   background: var(--ink);
-  font-family: 'DM Sans', sans-serif;
+  font-family: "Exo 2", sans-serif;
   color: #f0e6ee;
 }
 
@@ -458,7 +459,6 @@ html, body {
   padding: 1.05rem 1.2rem 0.45rem;
   font-size: 0.93rem;
   color: #f0e6ee;
-  font-family: 'DM Sans', sans-serif;
   outline: none;
   transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
 }
@@ -556,7 +556,6 @@ html, body {
   border-radius: var(--radius-btn);
   background: var(--grad-primary);
   color: #fff;
-  font-family: 'DM Sans', sans-serif;
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -592,7 +591,6 @@ html, body {
   border: none;
   color: rgba(169, 180, 194, 0.5);
   cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
   font-size: 0.88rem;
   padding: 0.5rem;
   transition: color 0.2s;
@@ -614,7 +612,6 @@ html, body {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.09);
   color: rgba(240, 230, 238, 0.8);
-  font-family: 'DM Sans', sans-serif;
   font-size: 0.88rem;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.2s;
@@ -637,11 +634,6 @@ html, body {
   margin-bottom: 0.4rem;
 }
 
-.display-title {
-  font-family: 'Playfair Display', serif;
-  color: #f0e6ee;
-  line-height: 1.15;
-}
 
 .muted {
   color: rgba(169, 180, 194, 0.55);
