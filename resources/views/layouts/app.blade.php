@@ -1,16 +1,25 @@
 @if (session('success'))
-  <div class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50">
-    {{ session('success') }}
+  <div class="flash fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50 flex items-start gap-3">
+    <div class="min-w-0">
+      {{ session('success') }}
+    </div>
+    <button type="button" aria-label="Close" class="text-white/90 hover:text-white ml-2 text-lg leading-none" onclick="this.closest('.flash').remove()">
+      &times;
+    </button>
   </div>
-
 @endif
 
 @if (session('error'))
-  <div class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50">
-    {{ session('error') }}
+  <div class="flash fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50 flex items-start gap-3">
+    <div class="min-w-0">
+      {{ session('error') }}
+    </div>
+    <button type="button" aria-label="Close" class="text-white/90 hover:text-white ml-2 text-lg leading-none" onclick="this.closest('.flash').remove()">
+      &times;
+    </button>
   </div>
-
 @endif
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 

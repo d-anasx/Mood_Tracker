@@ -67,8 +67,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Dashboard
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // User Management
+    // User Management - GET for page load, POST for AJAX search
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::post('/users/search', [UserManagementController::class, 'search'])->name('users.search');
+    
     Route::get('/users/{id}', [UserManagementController::class, 'show'])->name('users.show');
     Route::post('/users/{id}/approve', [UserManagementController::class, 'approve'])->name('users.approve');
     Route::post('/users/{id}/block', [UserManagementController::class, 'block'])->name('users.block');
