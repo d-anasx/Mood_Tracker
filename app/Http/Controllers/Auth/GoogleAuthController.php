@@ -52,15 +52,15 @@ class GoogleAuthController extends Controller
             }
             
             // Check user status
-            if ($user->status === 'pending') {
-                return redirect()->route('login')
-                    ->with('error', 'Your account is pending approval. Please wait for admin activation.');
-            }
+            // if ($user->status === 'pending') {
+            //     return redirect()->route('login')
+            //         ->with('error', 'Your account is pending approval. Please wait for admin activation.');
+            // }
             
-            if ($user->status === 'blocked') {
-                return redirect()->route('login')
-                    ->with('error', 'Your account has been blocked. Please contact support.');
-            }
+            // if ($user->status === 'blocked') {
+            //     return redirect()->route('login')
+            //         ->with('error', 'Your account has been blocked. Please contact support.');
+            // }
             
             // Login the user
             Auth::login($user, true);

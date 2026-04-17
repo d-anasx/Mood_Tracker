@@ -20,25 +20,25 @@ class AuthMiddleware
 
         $user = Auth::user();
 
-        if ($user->status === 'pending') {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+        // if ($user->status === 'pending') {
+        //     Auth::logout();
+        //     $request->session()->invalidate();
+        //     $request->session()->regenerateToken();
 
-            return redirect()
-                ->route('login')
-                ->withErrors(['email' => 'Your account is awaiting admin approval.']);
-        }
+        //     return redirect()
+        //         ->route('login')
+        //         ->withErrors(['email' => 'Your account is awaiting admin approval.']);
+        // }
 
-        if ($user->status === 'blocked') {
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+        // if ($user->status === 'blocked') {
+        //     Auth::logout();
+        //     $request->session()->invalidate();
+        //     $request->session()->regenerateToken();
 
-            return redirect()
-                ->route('login')
-                ->withErrors(['email' => 'Your account has been suspended. Please contact support.']);
-        }
+        //     return redirect()
+        //         ->route('login')
+        //         ->withErrors(['email' => 'Your account has been suspended. Please contact support.']);
+        // }
 
         return $next($request);
     }

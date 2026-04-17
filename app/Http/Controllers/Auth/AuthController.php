@@ -59,21 +59,21 @@ class AuthController extends Controller
         }
 
         // Check user status
-        $user = Auth::user();
+        // $user = Auth::user();
 
-        if ($user->status === 'pending') {
-            Auth::logout();
-            return back()->withErrors([
-                'email' => 'Your account is pending approval. Please wait for admin activation.',
-            ])->onlyInput('email');
-        }
+        // if ($user->status === 'pending') {
+        //     Auth::logout();
+        //     return back()->withErrors([
+        //         'email' => 'Your account is pending approval. Please wait for admin activation.',
+        //     ])->onlyInput('email');
+        // }
 
-        if ($user->status === 'blocked') {
-            Auth::logout();
-            return back()->withErrors([
-                'email' => 'Your account has been blocked. Please contact support.',
-            ])->onlyInput('email');
-        }
+        // if ($user->status === 'blocked') {
+        //     Auth::logout();
+        //     return back()->withErrors([
+        //         'email' => 'Your account has been blocked. Please contact support.',
+        //     ])->onlyInput('email');
+        // }
 
         // Regenerate session to prevent fixation attacks
         $request->session()->regenerate();

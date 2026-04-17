@@ -33,7 +33,7 @@ Route::middleware('guest')->group(function () {
 // ══════════════════════════════════════════════════════════
 // AUTHENTICATED ROUTES
 // ══════════════════════════════════════════════════════════
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','check.status'])->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
     
     // Profile (placeholder)
     Route::get('/profile', function() {
@@ -80,4 +81,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Notifications
     Route::get('/notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
     Route::post('/notifications/send', [NotificationController::class, 'send'])->name('notifications.send');
+});
+
+// STATUS PAGES 
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/waiting-approval', function () {
+        return view('auth.waiting');
+    })->name('waiting.approval');
+    
+    Route::get('/account-blocked', function () {
+        return view('auth.blocked');
+    })->name('account.blocked');
 });
