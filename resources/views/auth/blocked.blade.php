@@ -155,27 +155,7 @@
             You cannot access MoodTrace at this time.
         </p>
         
-        <div class="info-box">
-            <div class="info-title">What does this mean?</div>
-            <div class="info-text">
-                Your account has been restricted from accessing MoodTrace services. 
-                This action was taken by an administrator following a review of your account activity.
-            </div>
-        </div>
-        
-        <div class="info-box" style="border-left-color: var(--bloom);">
-            <div class="info-title" style="color: var(--bloom);">Need help?</div>
-            <div class="info-text">
-                If you believe this is a mistake, please contact our support team at 
-                <a href="mailto:support@moodtrace.com" class="contact-link">support@moodtrace.com</a>
-                and we'll review your case.
-            </div>
-        </div>
-        
         <div class="action-buttons">
-            <a href="mailto:support@moodtrace.com" class="contact-btn">
-                📧 Contact Support
-            </a>
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                 @csrf
                 <button type="submit" class="logout-btn-block">

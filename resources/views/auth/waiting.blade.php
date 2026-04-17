@@ -159,10 +159,6 @@
             </div>
         </div>
         
-        <p class="waiting-message" style="font-size: 0.85rem; margin-bottom: 1.5rem;">
-            Need help? Contact support at 
-            <a href="mailto:support@moodtrace.com" class="contact-link">support@moodtrace.com</a>
-        </p>
         
         <form method="POST" action="{{ route('logout') }}">
             @csrf
