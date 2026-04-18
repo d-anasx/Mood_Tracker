@@ -1,20 +1,24 @@
 @if (session('success'))
-  <div class="flash fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50 flex items-start gap-3">
+  <div
+    class="flash fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50 flex items-start gap-3">
     <div class="min-w-0">
       {{ session('success') }}
     </div>
-    <button type="button" aria-label="Close" class="text-white/90 hover:text-white ml-2 text-lg leading-none" onclick="this.closest('.flash').remove()">
+    <button type="button" aria-label="Close" class="text-white/90 hover:text-white ml-2 text-lg leading-none"
+      onclick="this.closest('.flash').remove()">
       &times;
     </button>
   </div>
 @endif
 
 @if (session('error'))
-  <div class="flash fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50 flex items-start gap-3">
+  <div
+    class="flash fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg animate-float-up z-50 flex items-start gap-3">
     <div class="min-w-0">
       {{ session('error') }}
     </div>
-    <button type="button" aria-label="Close" class="text-white/90 hover:text-white ml-2 text-lg leading-none" onclick="this.closest('.flash').remove()">
+    <button type="button" aria-label="Close" class="text-white/90 hover:text-white ml-2 text-lg leading-none"
+      onclick="this.closest('.flash').remove()">
       &times;
     </button>
   </div>
@@ -173,6 +177,16 @@
       }
     }
   </script>
+
+  @if (
+      auth()->check() &&
+      auth()->user()->status === 'active'
+    )
+    <script> window.chtlConfig = { chatbotId: "1838587568" } </script>
+    <script async data-id="1838587568" id="chtl-script" type="text/javascript"
+      src="https://chatling.ai/js/embed.js"></script>
+
+  @endif
 
   <!-- Global base CSS -->
   <link rel="stylesheet" href="{{ asset('css/moodtrace-base.css') }}" />
