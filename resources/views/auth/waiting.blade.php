@@ -144,21 +144,6 @@
             Your account is currently awaiting approval from an administrator.
         </p>
         
-        <div class="waiting-steps">
-            <div class="step-item">
-                <div class="step-number">1</div>
-                <div class="step-text">Admin reviews your registration</div>
-            </div>
-            <div class="step-item">
-                <div class="step-number">2</div>
-                <div class="step-text">You receive a notification email when approved</div>
-            </div>
-            <div class="step-item">
-                <div class="step-number">3</div>
-                <div class="step-text">Log in and start tracking your mood!</div>
-            </div>
-        </div>
-        
         
         <form method="POST" action="{{ route('logout') }}">
             @csrf

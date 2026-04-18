@@ -54,14 +54,6 @@
           </div>
         </li>
 
-        <li class="step-item">
-          <div class="step-circle" id="sc-4">4</div>
-          <div class="step-text">
-            <div class="step-name" id="sn-4">Preferences</div>
-            <div class="step-desc" id="sd-4">Reminders &amp; timezone</div>
-          </div>
-        </li>
-
       </ol>
 
       <div class="sidebar-progress" aria-label="Overall progress">
@@ -88,7 +80,7 @@
         {{-- ── STEP 1 — Account ── --}}
         <div class="step-panel is-active" id="panel-1" role="group" aria-labelledby="sh-1">
           <div class="step-header">
-            <p class="step-eyebrow">Step 1 of 4</p>
+            <p class="step-eyebrow">Step 1 of 3</p>
             <h2 class="step-title" id="sh-1">Create your account</h2>
             <p class="step-subtitle">Start your emotional wellness journey.</p>
           </div>
@@ -135,7 +127,7 @@
         {{-- ── STEP 2 — Profile ── --}}
         <div class="step-panel" id="panel-2" role="group" aria-labelledby="sh-2">
           <div class="step-header">
-            <p class="step-eyebrow">Step 2 of 4</p>
+            <p class="step-eyebrow">Step 2 of 3</p>
             <h2 class="step-title" id="sh-2">Build your profile</h2>
             <p class="step-subtitle">Personalise your MoodTrace experience.</p>
           </div>
@@ -196,56 +188,6 @@
           </div>
 
           <div class="btn-row">
-            <button type="button" class="btn-ghost" onclick="goStep(2)">← Back</button>
-            <button type="button" class="btn-primary" style="width:auto;padding:.9rem 2rem;" onclick="goStep(4)">
-              Continue →
-            </button>
-          </div>
-        </div>
-
-        {{-- ── STEP 4 — Preferences ── --}}
-        <div class="step-panel" id="panel-4" role="group" aria-labelledby="sh-4">
-          <div class="step-header">
-            <p class="step-eyebrow">Step 4 of 4</p>
-            <h2 class="step-title" id="sh-4">Your preferences</h2>
-            <p class="step-subtitle">Set up reminders to stay consistent.</p>
-          </div>
-
-          <div class="toggle-row">
-            <div>
-              <div class="toggle-label">Daily reminder</div>
-              <div class="toggle-sub">Get nudged to log your mood each day</div>
-            </div>
-            <input type="checkbox" class="toggle" id="reminderToggle" name="reminder_enabled"
-              value="1" checked onchange="toggleReminderTime()"/>
-          </div>
-
-          <div class="field" id="reminderTimeField">
-            <input type="time" id="reminderTime" name="reminder_time" value="20:00"
-              style="padding:1rem 1.2rem;"/>
-            <label for="reminderTime">Reminder time</label>
-          </div>
-
-          <div class="field">
-            <select id="timezone" name="timezone">
-              @foreach([
-                'UTC'                 => 'UTC',
-                'Europe/Paris'        => 'Europe/Paris (GMT+1)',
-                'America/New_York'    => 'America/New York (GMT-5)',
-                'America/Los_Angeles' => 'America/Los Angeles (GMT-8)',
-                'Asia/Tokyo'          => 'Asia/Tokyo (GMT+9)',
-                'Asia/Dubai'          => 'Asia/Dubai (GMT+4)',
-                'Australia/Sydney'    => 'Australia/Sydney (GMT+11)',
-              ] as $value => $label)
-                <option value="{{ $value }}" {{ old('timezone', 'Europe/Paris') === $value ? 'selected' : '' }}>
-                  {{ $label }}
-                </option>
-              @endforeach
-            </select>
-            <label for="timezone">Timezone</label>
-          </div>
-
-          <div class="btn-row">
             <button type="button" class="btn-ghost" onclick="goStep(3)">← Back</button>
             <button type="submit" class="btn-primary" style="width:auto;padding:.9rem 2.2rem;" id="submitBtn">
               Create Account ✦
@@ -253,9 +195,10 @@
           </div>
         </div>
 
+
       </form>{{-- /registerForm --}}
 
-      {{-- ── STEP 5 — Success ── --}}
+      {{-- ── STEP 4 — Success ── --}}
       <div class="step-panel" id="panel-5" role="status" aria-live="polite">
         <div class="success-wrap">
           <div class="success-icon" aria-hidden="true">✓</div>

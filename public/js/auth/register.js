@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── State ─────────────────────────────────────────────────
   let currentStep = 1;
-  const TOTAL     = 4;
+  const TOTAL     = 3;
 
   // ── DOM refs ──────────────────────────────────────────────
   const form        = document.getElementById('registerForm');
@@ -23,10 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Step 2
   const nameEl   = document.getElementById('reg-name');
 
-  // Step 4
-  const reminderToggle    = document.getElementById('reminderToggle');
-  const reminderTimeEl    = document.getElementById('reminderTime');
-  const reminderTimeField = document.getElementById('reminderTimeField');
 
   // ── Generic helpers ───────────────────────────────────────
 
@@ -160,23 +156,23 @@ document.addEventListener('DOMContentLoaded', () => {
     return true; // both fields are optional
   }
 
-  // ── Step 4 — Validators ───────────────────────────────────
+  // // ── Step 4 — Validators ───────────────────────────────────
 
-  function validateReminderTime() {
-    if (!reminderToggle.checked) return true;
+  // function validateReminderTime() {
+  //   if (!reminderToggle.checked) return true;
 
-    const val = reminderTimeEl.value;
-    if (!val) {
-      setError(reminderTimeEl, 'Please set a reminder time.');
-      return false;
-    }
-    setSuccess(reminderTimeEl);
-    return true;
-  }
+  //   const val = reminderTimeEl.value;
+  //   if (!val) {
+  //     setError(reminderTimeEl, 'Please set a reminder time.');
+  //     return false;
+  //   }
+  //   setSuccess(reminderTimeEl);
+  //   return true;
+  // }
 
-  function validateStep4() {
-    return validateReminderTime();
-  }
+  // function validateStep4() {
+  //   return validateReminderTime();
+  // }
 
   // ── Step navigation ───────────────────────────────────────
 
@@ -184,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     1: validateStep1,
     2: validateStep2,
     3: validateStep3,
-    4: validateStep4,
   };
 
   window.goStep = function (n) {
@@ -298,8 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
   nameEl.addEventListener('input', () => {
     if (getField(nameEl).classList.contains('has-error')) validateName();
   });
-
-  reminderTimeEl.addEventListener('blur', validateReminderTime);
 
   // ── Avatar selection ──────────────────────────────────────
 

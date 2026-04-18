@@ -85,7 +85,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 // STATUS PAGES 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth','guest'])->group(function () {
     Route::get('/waiting-approval', function () {
         return view('auth.waiting');
     })->name('waiting.approval');

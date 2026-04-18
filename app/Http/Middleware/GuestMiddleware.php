@@ -12,7 +12,7 @@ class GuestMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check()) {
+        if (Auth::check() && Auth::user()->status === 'active') {
             return redirect()->route('dashboard');
         }
 
