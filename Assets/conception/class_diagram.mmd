@@ -78,19 +78,9 @@ direction TB
 	    -datetime sent_at
     }
 
-    class UserSettings {
-	    -int id
-	    -int user_id
-	    -time reminder_time
-	    -boolean reminder_enabled
-	    -string timezone
-	    -datetime updated_at
-    }
-
     User "1" -- "1" Role : a un
     User "1" -- "0..*" MoodEntry : crée
     User "1" -- "0..*" Notification : reçoit
-    User "1" -- "0..1" UserSettings : configure
     User "1" -- "0..*" AdminAction : effectue (admin)
     MoodEntry "1" -- "0..*" MoodEntryFeeling
     MoodEntryFeeling "0..*" -- "1" Feeling
