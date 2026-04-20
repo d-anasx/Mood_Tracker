@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'check.status' => CheckUserStatus::class,
         ]);
+        $middleware->append(\App\Http\Middleware\ForceCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
