@@ -27,7 +27,6 @@ class DashboardController extends Controller
         $trendData = $this->calculateTrend($user);
 
         // ── Quote logic ─────────────────────────────────────
-        // Priority: 1) Gemini AI  2) DB quote  3) hardcoded fallback
         $quote       = null;
         $quoteSource = 'fallback';
 

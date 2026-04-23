@@ -127,39 +127,6 @@
         </div>
     </div>
 
-    {{-- Recent Mood Entries --}}
-    <div class="glass-card p-6 mb-6">
-        <h3 class="text-xl font-display text-white mb-4">Recent Mood Entries</h3>
-        
-        @if($user->moodEntries->count() > 0)
-            <div class="space-y-3">
-                @foreach($user->moodEntries->take(10) as $entry)
-                <div class="p-3 rounded-lg" style="background: rgba(255, 255, 255, 0.03);">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span class="text-lg font-bold text-bloom">{{ $entry->mood_level }}/10</span>
-                            <span class="text-mist text-sm ml-2">{{ $entry->entry_date->format('M j, Y') }}</span>
-                        </div>
-                        <div class="flex gap-1">
-                            @foreach($entry->feelings as $feeling)
-                                <span class="text-xs px-2 py-1 rounded-full" style="background: {{ $feeling->color }}20; color: {{ $feeling->color }};">{{ $feeling->icon }} {{ $feeling->name }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                    @if($entry->reflection)
-                        <p class="text-sm text-mist mt-2 line-clamp-2">{{ $entry->reflection }}</p>
-                    @endif
-                    @if($entry->sleep_hours)
-                        <p class="text-xs text-mist mt-1">💤 {{ $entry->sleep_hours }} hours sleep</p>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-        @else
-            <p class="text-mist text-center py-4">No mood entries yet</p>
-        @endif
-    </div>
-
     {{-- Admin Actions History --}}
     @if($adminActions->count() > 0)
     <div class="glass-card p-6">

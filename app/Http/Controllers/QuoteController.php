@@ -7,6 +7,7 @@ use App\Models\Quote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class QuoteController extends Controller
 {
@@ -33,7 +34,7 @@ class QuoteController extends Controller
 
         // Try Gemini first
         $aiQuote = $this->gemini->generateMoodQuote($moodLevel, $feelings, $reflection);
-        dump("AI Quote: ", $aiQuote);
+        Log::info("AI Quote generation for mood level $moodLevel with feelings [" . implode(', ', $feelings) . "] and reflection: $reflection. Result: " . ($aiQuote ?? 'null'));
         if ($aiQuote) {
             return response()->json([
                 'source' => 'ai',

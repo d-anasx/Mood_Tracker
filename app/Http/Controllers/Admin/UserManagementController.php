@@ -1,14 +1,14 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\AdminAction;
 use App\Models\Notification;
+use App\Models\User;
+use App\Notifications\PushNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class UserManagementController extends Controller
 {
@@ -19,38 +19,38 @@ class UserManagementController extends Controller
         // Get filters from request
         $status = $request->input('status', '');
         $search = $request->input('search', '');
-        $page = $request->input('page', 1);
+        $page   = $request->input('page', 1);
 
         if ($status && in_array($status, ['active', 'pending', 'blocked'])) {
             $query->where('status', $status);
         }
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         $users = $query->latest()->paginate(20, ['*'], 'page', $page);
-        
+
         // Check if AJAX request for real-time search/filter
         if ($request->ajax()) {
-            $html = view('admin.users.partials.users-table', compact('users'))->render();
+            $html       = view('admin.users.partials.users-table', compact('users'))->render();
             $pagination = view('admin.users.partials.pagination', compact('users'))->render();
-            
+
             return response()->json([
-                'success' => true,
-                'html' => $html,
+                'success'    => true,
+                'html'       => $html,
                 'pagination' => $pagination,
-                'total' => $users->total()
+                'total'      => $users->total(),
             ]);
         }
 
         return view('admin.users.index', compact('users'));
     }
 
-     /**
+    /**
      * Handle AJAX search requests
      */
     public function search(Request $request)
@@ -59,44 +59,44 @@ class UserManagementController extends Controller
 
         $status = $request->input('status', '');
         $search = $request->input('search', '');
-        $page = $request->input('page', 1);
+        $page   = $request->input('page', 1);
 
         if ($status && in_array($status, ['active', 'pending', 'blocked'])) {
             $query->where('status', $status);
         }
 
         if ($search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         $users = $query->latest()->paginate(20, ['*'], 'page', $page);
-        
-        $html = view('admin.users.partials.users-table', compact('users'))->render();
+
+        $html       = view('admin.users.partials.users-table', compact('users'))->render();
         $pagination = view('admin.users.partials.pagination', compact('users'))->render();
-        
+
         return response()->json([
-            'success' => true,
-            'html' => $html,
+            'success'    => true,
+            'html'       => $html,
             'pagination' => $pagination,
-            'total' => $users->total()
+            'total'      => $users->total(),
         ]);
     }
-    
+
     public function show($id)
     {
-        $user = User::with(['moodEntries' => function($q) {
-                $q->latest()->take(30);
-            }, 'moodEntries.feelings', 'notifications'])
+        $user = User::with(['moodEntries' => function ($q) {
+            $q->latest()->take(30);
+        }, 'moodEntries.feelings', 'notifications'])
             ->findOrFail($id);
 
         $stats = [
             'total_entries' => $user->moodEntries()->count(),
-            'avg_mood' => round($user->moodEntries()->avg('mood_level') ?? 0, 1),
-            'streak' => $this->getUserStreak($user),
-            'last_entry' => $user->moodEntries()->latest()->first(),
+            'avg_mood'      => round($user->moodEntries()->avg('mood_level') ?? 0, 1),
+            'streak'        => $this->getUserStreak($user),
+            'last_entry'    => $user->moodEntries()->latest()->first(),
         ];
 
         $adminActions = AdminAction::with('admin')
@@ -120,20 +120,28 @@ class UserManagementController extends Controller
             $user->update(['status' => 'active']);
 
             AdminAction::create([
-                'admin_id' => auth()->id(),
+                'admin_id'       => auth()->id(),
                 'target_user_id' => $user->id,
-                'action_type' => 'approve',
-                'reason' => 'Account approved by admin',
+                'action_type'    => 'approve',
+                'reason'         => 'Account approved by admin',
             ]);
 
             Notification::create([
-                'user_id' => $user->id,
-                'title' => 'Account Approved! 🎉',
-                'message' => 'Your account has been approved by an administrator. You can now log in and start tracking your mood!',
-                'is_read' => false,
+                'user_id'    => $user->id,
+                'title'      => 'Account Approved! 🎉',
+                'message'    => 'Your account has been approved by an administrator. You can now log in and start tracking your mood!',
+                'is_read'    => false,
                 'created_at' => now(),
             ]);
         });
+
+        // web push
+
+        $user->notify(new PushNotification(
+            'Account Approved! 🎉',
+            'Your MoodTrace account has been approved. Log in now!',
+            route('dashboard')
+        ));
 
         return redirect()->back()->with('success', "User {$user->name} has been approved.");
     }
@@ -154,19 +162,27 @@ class UserManagementController extends Controller
             $user->update(['status' => 'blocked']);
 
             AdminAction::create([
-                'admin_id' => auth()->id(),
+                'admin_id'       => auth()->id(),
                 'target_user_id' => $user->id,
-                'action_type' => 'block',
-                'reason' => $request->reason,
+                'action_type'    => 'block',
+                'reason'         => $request->reason,
             ]);
 
             Notification::create([
                 'user_id' => $user->id,
-                'title' => 'Account Blocked',
+                'title'   => 'Account Blocked',
                 'message' => "Your account has been blocked by an administrator. Reason: {$request->reason}",
-                'is_read' => false,
+                'is_read'    => false,
                 'created_at' => now(),
             ]);
+
+            // web push
+
+            $user->notify(new PushNotification(
+                'Account Blocked',
+                "Your MoodTrace account has been blocked. Reason: {$request->reason}",
+                route('dashboard')
+            ));
         });
 
         return redirect()->back()->with('success', "User {$user->name} has been blocked.");
@@ -184,19 +200,28 @@ class UserManagementController extends Controller
             $user->update(['status' => 'active']);
 
             AdminAction::create([
-                'admin_id' => auth()->id(),
+                'admin_id'       => auth()->id(),
                 'target_user_id' => $user->id,
-                'action_type' => 'unblock',
-                'reason' => 'Account unblocked by admin',
+                'action_type'    => 'unblock',
+                'reason'         => 'Account unblocked by admin',
             ]);
 
             Notification::create([
-                'user_id' => $user->id,
-                'title' => 'Account Unblocked ✅',
-                'message' => 'Your account has been unblocked by an administrator. You can now log in again.',
-                'is_read' => false,
+                'user_id'    => $user->id,
+                'title'      => 'Account Unblocked ✅',
+                'message'    => 'Your account has been unblocked by an administrator. You can now log in again.',
+                'is_read'    => false,
                 'created_at' => now(),
             ]);
+
+            // web push
+
+            $user->notify(new PushNotification(
+                'Account Unblocked ✅',
+                'Your MoodTrace account has been unblocked. Log in now!',
+                route('dashboard')
+            ));
+
         });
 
         return redirect()->back()->with('success', "User {$user->name} has been unblocked.");
@@ -233,12 +258,14 @@ class UserManagementController extends Controller
             ->unique()
             ->values();
 
-        if ($dates->isEmpty()) return 0;
+        if ($dates->isEmpty()) {
+            return 0;
+        }
 
-        $streak = 0;
+        $streak    = 0;
         $checkDate = Carbon::today();
 
-        if (!$dates->first()->isSameDay($checkDate)) {
+        if (! $dates->first()->isSameDay($checkDate)) {
             $checkDate = Carbon::yesterday();
         }
 

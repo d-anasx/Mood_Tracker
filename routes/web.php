@@ -53,6 +53,8 @@ Route::middleware(['auth','check.status'])->group(function () {
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+
     
     // Profile (placeholder)
     Route::get('/profile', function() {
@@ -85,7 +87,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 // STATUS PAGES 
 
-Route::middleware(['auth','guest'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/waiting-approval', function () {
         return view('auth.waiting');
     })->name('waiting.approval');
@@ -93,4 +95,31 @@ Route::middleware(['auth','guest'])->group(function () {
     Route::get('/account-blocked', function () {
         return view('auth.blocked');
     })->name('account.blocked');
+
 });
+
+//web push
+Route::middleware('auth')->group(function () {
+     
+    Route::post('/push-subscribe', function (Illuminate\Http\Request $request) {
+    try {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Non authentifié'], 401);
+        }
+        
+        $user->updatePushSubscription(
+            $request->input('endpoint'),
+            $request->input('keys.p256dh'),
+            $request->input('keys.auth')
+        );
+        
+        return response()->json(['success' => true, 'message' => 'Souscription sauvegardée']);
+        
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+})->name('push.subscribe');
+});
+

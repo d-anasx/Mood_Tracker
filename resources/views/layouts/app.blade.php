@@ -31,6 +31,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <meta name="vapid-public-key" content="{{ config('services.vapid.public_key') }}">
 
   <title>@yield('title', 'MoodTrace') — MoodTrace</title>
 
@@ -42,7 +43,7 @@
 
   <!-- DaisyUI v5 -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" />
-
+  <link rel="icon" type="image/png" href="{{ asset('assets/Mood_Tracker.png') }}">
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -250,7 +251,7 @@
           {{-- Notification Bell Wrapper --}}
           <div class="relative" id="notifWrap">
             @php
-              $notifications = auth()->user()->notifications()->latest()->take(5)->get();
+              $notifications = auth()->user()->notifications()->where('is_read', false)->latest()->get();
               $unreadCount = auth()->user()->notifications()->where('is_read', false)->count();
             @endphp
 
@@ -259,6 +260,7 @@
               <span class="notif-icon text-xl">🔔</span>
               @if ($unreadCount > 0)
                 <span
+                id="notif-number"
                   class="absolute top-1 right-1 bg-bloom text-ink text-[7px] font-bold p-0.5 rounded-full min-w-[18px] text-center border border-ink">
                   {{ $unreadCount }}
                 </span>
@@ -270,13 +272,12 @@
               class="hidden absolute right-0 mt-3 w-80 bg-ink/95 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl z-50 overflow-hidden animate-float-up">
               <div class="p-4 border-b border-white/5 flex justify-between items-center">
                 <h3 class="font-display text-petal font-bold">Notifications</h3>
-                <span class="text-[10px] uppercase tracking-widest text-mist">{{ $unreadCount }} New</span>
               </div>
 
               <div class="max-h-[350px] overflow-y-auto custom-scrollbar">
                 @forelse($notifications as $notif)
                   <div
-                    class="p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group {{ !$notif->is_read ? 'bg-bloom/5' : '' }}">
+                    class="p-4 border-b flex flex-col border-white/5 hover:bg-white/5 transition-colors cursor-pointer group {{ !$notif->is_read ? 'bg-bloom/5' : '' }}">
                     <div class="flex justify-between items-start gap-2">
                       <span class="font-medium text-sm text-white group-hover:text-petal transition-colors">
                         {{ $notif->title ?? 'Notification' }}
@@ -286,6 +287,13 @@
                     <p class="text-xs text-mist mt-1 leading-relaxed line-clamp-2">
                       {{ $notif->message }}
                     </p>
+                    <button type="button"
+                      class="dismiss-notif ml-2 p-1 w-5 self-center rounded-full text-red-400 bg-transparent hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-red-400 opacity-0 group-hover:opacity-100 transition-all text-xs"
+                      data-id="{{ $notif->id }}" title="Dismiss">
+                      <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </button>
                   </div>
                 @empty
                   <div class="p-8 text-center text-mist text-sm italic">
@@ -294,10 +302,9 @@
                 @endforelse
               </div>
 
-              <a href=""
+              <span
                 class="block p-3 text-center text-xs font-bold text-petal hover:bg-white/5 transition-colors border-t border-white/5">
-                View All Activity
-              </a>
+              </span>
             </div>
           </div>
 
@@ -461,6 +468,122 @@
         });
       }
 
+    });
+
+    // web push
+
+    window.vapidPublicKey = '{{ env("VAPID_PUBLIC_KEY") }}';
+    console.log('VAPID Key chargée:', window.vapidPublicKey ? '✅ Oui' : '❌ Non');
+
+    function urlBase64ToUint8Array(base64String) {
+      // Ajouter le padding si nécessaire
+      while (base64String.length % 4 !== 0) {
+        base64String += '=';
+      }
+      // Remplacer les caractères URL-safe
+      base64String = base64String.replace(/-/g, '+').replace(/_/g, '/');
+
+      const rawData = window.atob(base64String);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    async function manualSubscribe() {
+      console.log('1. Début de l\'inscription...');
+
+      // Récupérer la clé depuis le meta tag
+      const vapidKey = document.querySelector('meta[name="vapid-public-key"]').content;
+      console.log('2. Clé VAPID:', vapidKey.substring(0, 30) + '...');
+
+      if (!vapidKey) {
+        console.error('❌ Clé VAPID non trouvée');
+        return;
+      }
+
+      // Vérifier le Service Worker
+      const registration = await navigator.serviceWorker.ready;
+      console.log('3. Service Worker prêt');
+
+      // Demander la permission
+      const permission = await Notification.requestPermission();
+      console.log('4. Permission:', permission);
+
+      if (permission !== 'granted') {
+        console.log('❌ Permission refusée');
+        return;
+      }
+
+      try {
+        // Créer la souscription
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidKey)
+        });
+        console.log('5. Souscription créée');
+
+        // Envoyer au serveur
+        const response = await fetch('/push-subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify(subscription)
+        });
+
+        const result = await response.json();
+        console.log('6. Réponse:', result);
+
+        if (result.success) {
+          console.log('✅ INSCRIPTION RÉUSSIE !');
+        }
+      } catch (error) {
+        console.error('❌ Erreur:', error);
+      }
+    }
+
+    manualSubscribe();
+
+
+     // mark as read notif
+      document.querySelectorAll('.dismiss-notif').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.stopPropagation();
+            const notifId = this.dataset.id;
+            const notifElement = this.closest('.border-b');
+            
+            try {
+                const response = await fetch('/notifications/' + notifId + '/read', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && notifElement) {
+                    notifElement.remove();
+                    
+                    // Mettre à jour le badge
+                    const badge = document.getElementById('notif-number');
+                    if (badge) {
+                        let count = parseInt(badge.textContent) - 1;
+                        if (count > 0) {
+                            badge.textContent = count;
+                        } else {
+                            badge.remove();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        });
     });
   </script>
 
