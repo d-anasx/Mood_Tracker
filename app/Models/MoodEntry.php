@@ -68,5 +68,6 @@ class MoodEntry extends Model
     public function isEditable(): bool
     {
         return $this->entry_date->isToday();
+        
     }
 }

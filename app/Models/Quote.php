@@ -38,11 +38,6 @@ class Quote extends Model
     {
         $category = QuoteCategory::where('mood_level', $moodLevel)->first();
 
-        if (!$category) {
-            // No exact match — try any active quote
-            return self::where('is_active', true)->inRandomOrder()->first();
-        }
-
         return self::where('category_id', $category->id)
             ->where('is_active', true)
             ->inRandomOrder()

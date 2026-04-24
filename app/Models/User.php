@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use NotificationChannels\WebPush\HasPushSubscriptions;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -47,11 +48,6 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class);
-    }
-
-    public function settings()
-    {
-        return $this->hasOne(UserSettings::class);
     }
 
     public function adminActions()
@@ -105,5 +101,40 @@ class User extends Authenticatable
             ->orderBy('entry_date', 'desc')
             ->take($count)
             ->get();
+    }
+
+    // get streak 
+
+    public function getStreak(): int
+    {
+        $dates = $this->moodEntries()
+            ->orderByDesc('entry_date')
+            ->pluck('entry_date')
+            ->map(fn($d) => Carbon::parse($d)->startOfDay())
+            ->unique()
+            ->values();
+
+        if ($dates->isEmpty()) {
+            return 0;
+        }
+
+        $streak    = 0;
+        $checkDate = Carbon::today();
+
+        // If no entry today, start checking from yesterday
+        if (! $dates->first()->isSameDay($checkDate)) {
+            $checkDate = Carbon::yesterday();
+        }
+
+        foreach ($dates as $date) {
+            if ($date->isSameDay($checkDate)) {
+                $streak++;
+                $checkDate->subDay();
+            } else {
+                break;
+            }
+        }
+
+        return $streak;
     }
 }

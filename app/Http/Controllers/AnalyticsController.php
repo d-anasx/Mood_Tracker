@@ -53,7 +53,7 @@ class AnalyticsController extends Controller
             ]);
 
         // ── 4. Streak (consecutive days logged) ───────────────
-        $streak = $this->currentStreak($user);
+        $streak = $user->getStreak();
 
         // ── 5. Summary stats ──────────────────────────────────
         $periodEntries = $user->moodEntries()->where('entry_date', '>=', $since);
@@ -76,35 +76,4 @@ class AnalyticsController extends Controller
         ));
     }
 
-    // ── Count how many consecutive days ending today the user logged ──
-    private function currentStreak($user): int
-    {
-        $dates = $user->moodEntries()
-            ->orderByDesc('entry_date')
-            ->pluck('entry_date')
-            ->map(fn($d) => Carbon::parse($d)->startOfDay())
-            ->unique()
-            ->values();
-
-        if ($dates->isEmpty()) return 0;
-
-        $streak    = 0;
-        $checkDate = Carbon::today();
-
-        // If no entry today, start checking from yesterday
-        if (!$dates->first()->isSameDay($checkDate)) {
-            $checkDate = Carbon::yesterday();
-        }
-
-        foreach ($dates as $date) {
-            if ($date->isSameDay($checkDate)) {
-                $streak++;
-                $checkDate->subDay();
-            } else {
-                break;
-            }
-        }
-
-        return $streak;
-    }
 }

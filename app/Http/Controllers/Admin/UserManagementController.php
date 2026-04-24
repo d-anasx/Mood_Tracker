@@ -21,16 +21,16 @@ class UserManagementController extends Controller
         $search = $request->input('search', '');
         $page   = $request->input('page', 1);
 
-        if ($status && in_array($status, ['active', 'pending', 'blocked'])) {
-            $query->where('status', $status);
-        }
+        // if ($status && in_array($status, ['active', 'pending', 'blocked'])) {
+        //     $query->where('status', $status);
+        // }
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
+        // if ($search) {
+        //     $query->where(function ($q) use ($search) {
+        //         $q->where('name', 'like', "%{$search}%")
+        //             ->orWhere('email', 'like', "%{$search}%");
+        //     });
+        // }
 
         $users = $query->latest()->paginate(20, ['*'], 'page', $page);
 
@@ -87,15 +87,12 @@ class UserManagementController extends Controller
 
     public function show($id)
     {
-        $user = User::with(['moodEntries' => function ($q) {
-            $q->latest()->take(30);
-        }, 'moodEntries.feelings', 'notifications'])
-            ->findOrFail($id);
+        $user = User::findOrFail($id);
 
         $stats = [
             'total_entries' => $user->moodEntries()->count(),
             'avg_mood'      => round($user->moodEntries()->avg('mood_level') ?? 0, 1),
-            'streak'        => $this->getUserStreak($user),
+            'streak'        => $user->getStreak(),
             'last_entry'    => $user->moodEntries()->latest()->first(),
         ];
 
@@ -249,35 +246,5 @@ class UserManagementController extends Controller
         return redirect()->route('admin.users.index')->with('success', "User {$userName} has been deleted.");
     }
 
-    private function getUserStreak($user): int
-    {
-        $dates = $user->moodEntries()
-            ->orderByDesc('entry_date')
-            ->pluck('entry_date')
-            ->map(fn($d) => Carbon::parse($d)->startOfDay())
-            ->unique()
-            ->values();
-
-        if ($dates->isEmpty()) {
-            return 0;
-        }
-
-        $streak    = 0;
-        $checkDate = Carbon::today();
-
-        if (! $dates->first()->isSameDay($checkDate)) {
-            $checkDate = Carbon::yesterday();
-        }
-
-        foreach ($dates as $date) {
-            if ($date->isSameDay($checkDate)) {
-                $streak++;
-                $checkDate->subDay();
-            } else {
-                break;
-            }
-        }
-
-        return $streak;
-    }
+    
 }
