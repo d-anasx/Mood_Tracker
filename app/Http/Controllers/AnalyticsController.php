@@ -41,13 +41,13 @@ class AnalyticsController extends Controller
 
         // ── 3. Best Day of Week ────────────────────────────────
         $dayOfWeek = $user->moodEntries()
-            ->selectRaw('DAYOFWEEK(entry_date) as dow, AVG(mood_level) as avg_mood, COUNT(*) as total')
+            ->selectRaw('EXTRACT(DOW FROM entry_date) as dow, AVG(mood_level) as avg_mood, COUNT(*) as total') // use DAYOFWEEK for MySQL , i used EXTRACT for postgresql
             ->where('entry_date', '>=', $since)
             ->groupBy('dow')
             ->orderBy('dow')
             ->get()
             ->map(fn($row) => [
-                'day'      => ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][$row->dow],
+                'day'      => ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][(int) $row->dow - 1], // dow-1 because EXTRACT(DOW) returns 0 for Sunday, 1 for Monday not like MySQL's DAYOFWEEK which returns 1 for Sunday
                 'avg_mood' => round((float) $row->avg_mood, 1),
                 'total'    => (int) $row->total,
             ]);
