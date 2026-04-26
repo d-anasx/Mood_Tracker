@@ -1,146 +1,140 @@
-# 🌙 MoodTrace - Application de Suivi d'Humeur
+# 🌙✨ MoodTrace — Mental Wellness & Mood Tracking App
+
+> 💭 *Because your mental health deserves the same attention as your deadlines.*
 
 ---
 
-## 📖 Présentation du projet
+## 📖 🌟 Overview
 
-**MoodTrace** est une application web de suivi d'humeur et de bien-être mental. Elle permet aux utilisateurs d'enregistrer quotidiennement leur état émotionnel, d'ajouter des réflexions personnelles, de suivre leurs heures de sommeil, et d'obtenir des analyses visuelles de leurs tendances émotionnelles.
-
-L'application intègre **l'intelligence artificielle Google Gemini** pour analyser les journaux intimes et fournir des conseils personnalisés.
-
----
-
-## 🎯 Problématique
-
-Dans le monde actuel, les gens sont focalisés sur le travail et l'argent, oubliant leur bien-être mental.
-
-**Problèmes identifiés :**
-- ❌ Perte de données et absence d'historique fiable
-- ❌ Manque de visualisation des tendances émotionnelles
-- ❌ Aucune corrélation automatique entre humeur et sommeil
-- ❌ Absence d'analyse intelligente des journaux
-
-**Solution :** Une application web avec suivi quotidien, analyses IA, visualisations interactives.
+**MoodTrace** is a full-stack web app to **track, analyze, and improve mental well-being**.
+It combines mood logging, journaling, sleep tracking, and **AI insights** 🤖 into one clean experience.
 
 ---
 
-## 🏗️ Architecture technique
-┌─────────────────────────────────────────────────────────────────┐
-│ FRONTEND │
-├─────────────────────────────────────────────────────────────────┤
-│ Blade (Laravel) + Tailwind CSS + DaisyUI + Chart.js │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ BACKEND │
-├─────────────────────────────────────────────────────────────────┤
-│ Laravel 11 + PHP 8.2 │
-│ • Authentification native + Google OAuth │
-│ • Notifications push (WebPush API) │
-│ • Service Worker pour les notifications │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ BASE DE DONNÉES │
-├─────────────────────────────────────────────────────────────────┤
-│ MySQL / PostgreSQL │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ SERVICES EXTERNES │
-├─────────────────────────────────────────────────────────────────┤
-│ • Google Gemini AI (analyse de journal) │
-│ • Google OAuth 2.0 (authentification) │
-│ • WebPush Protocol (notifications) │
-└─────────────────────────────────────────────────────────────────┘
+## 🎯 🚨 Problem
 
-text
+| ❌ Problem            | 💥 Impact               |
+| -------------------- | ----------------------- |
+| No emotional history | Patterns go unnoticed   |
+| No visualization     | Hard to detect triggers |
+| No sleep correlation | Missed insights         |
+| No AI journaling     | Surface-level thinking  |
 
 ---
 
-## 🛠️ Technologies utilisées
+## 💡 ✅ Solution
 
-| Catégorie | Technologies |
-|-----------|--------------|
-| **Backend** | Laravel 12, PHP 8.2 |
-| **Frontend** | Blade, Tailwind CSS, DaisyUI, Chart.js |
-| **Base de données** | MySQL / PostgreSQL |
-| **Authentification** | Laravel Auth, Google OAuth 2.0 |
-| **Notifications** | WebPush API, Service Workers, VAPID |
-| **IA** | Google Gemini AI REST API |
+* 📅 Daily tracking
+* 🤖 AI analysis
+* 📊 Visual insights
+* 🔐 Private & secure
 
 ---
 
-## 📁 Structure du projet (essentielle)
+## ✨ 🚀 Features
+
+* 📅 Mood Logging
+* 📓 AI Journal Analysis
+* 😴 Sleep Tracking
+* 📊 Charts & Trends
+* 🔔 Notifications
+* 🔐 Auth (Google OAuth)
+* 👤 Admin Panel
+
+---
+
+## 🏗️ 🧠 Architecture
+
+```
+🎨 FRONTEND
+Blade · Tailwind · DaisyUI · Chart.js
+        │
+        ▼
+⚙️ BACKEND
+Laravel · PHP
+        │
+        ▼
+🗄️ DATABASE
+MySQL / PostgreSQL
+        │
+        ▼
+🌐 SERVICES
+Gemini AI · OAuth · WebPush
+```
+
+---
+
+## 🛠️ 💻 Tech Stack
+
+### 🧠 Backend
+
+<p>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/laravel/laravel-original.svg" width="40"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/php/php-original.svg" width="40"/>
+</p>
+
+### 🎨 Frontend
+
+<p>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original.svg" width="40"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/css3/css3-original.svg" width="40"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" width="40"/>
+  <img src="https://www.vectorlogo.zone/logos/tailwindcss/tailwindcss-icon.svg" width="40"/>
+</p>
+
+### 🗄️ Database
+
+<p>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" width="40"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" width="40"/>
+</p>
+
+### ⚙️ Tools & Services
+
+<p>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg" width="40"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/github/github-original.svg" width="40"/>
+  <img src="https://www.vectorlogo.zone/logos/firebase/firebase-icon.svg" width="40"/>
+</p>
+
+---
+
+## 📁 🗂️ Structure
+
+```
 Mood_Tracker/
 ├── app/
-│ ├── Http/
-│ │ └── Controllers/
-│ │ ├── Admin/
-│ │ │ └── UserManagementController.php
-│ │ ├── Auth/
-│ │ │ ├── AuthController.php
-│ │ │ └── GoogleAuthController.php
-│ │ ├── AnalyticsController.php
-│ │ ├── DashboardController.php
-│ │ └── MoodEntryController.php
-│ ├── Models/
-│ │ ├── User.php
-│ │ ├── MoodEntry.php
-│ │ ├── Feeling.php
-│ │ └── Notification.php
-│ ├── Notifications/
-│ │ └── PushNotification.php
-│ └── Services/
-│ └── GeminiService.php
-│
 ├── database/
-│ ├── migrations/
-│ └── seeders/
-│
 ├── public/
-│ ├── css/
-│ ├── js/
-│ └── sw.js (Service Worker)
-│
 ├── resources/
-│ └── views/
-│ ├── layouts/
-│ ├── admin/
-│ ├── auth/
-│ ├── dashboard/
-│ ├── mood/
-│ └── analytics/
-│
 └── routes/
-└── web.php
-
-text
+```
 
 ---
 
-
----
-
-## 🚀 Installation rapide
+## 🚀 ⚡ Quick Start
 
 ```bash
-# 1. Cloner le projet
-git clone https://github.com/votre-username/mood-trace.git
+git clone https://github.com/your-username/mood-trace.git
 cd mood-trace
 
-# 2. Installer les dépendances
 composer install
+npm install && npm run build
 
-# 3. Configurer l'environnement
 cp .env.example .env
 php artisan key:generate
 
-# 4. Configurer la base de données
 php artisan migrate --seed
-
-# 5. Démarrer le serveur
 php artisan serve
+```
+
+🌐 http://localhost:8000
+
+
+---
+
+<div align="center">
+
+💜 Built for better mental health
+
+</div>
