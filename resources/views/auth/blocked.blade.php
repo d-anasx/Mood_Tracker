@@ -1,7 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'Account Blocked')
+@if (Auth::check() && Auth::user()->status === 'active')
+    @php
+        redirect()->intended('/dashboard')->send();
+    @endphp
 
+@endif
 @section('orbs')
     <div class="orb orb-purple"></div>
     <div class="orb orb-rose"></div>

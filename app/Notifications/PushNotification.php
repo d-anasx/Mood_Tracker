@@ -31,7 +31,7 @@ class PushNotification extends Notification
     {
         return (new WebPushMessage)
             ->title($this->title)
-            ->icon('/favicon.ico')
+            ->icon(asset('assets/Mood_Tracker.png'))
             ->body($this->body)
             ->action('Voir', $this->url)
             ->options(['TTL' => 86400]);

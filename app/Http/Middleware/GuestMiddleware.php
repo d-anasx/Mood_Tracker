@@ -12,6 +12,10 @@ class GuestMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
+        $currentRoute = $request->route()->getName();
+        if (in_array($currentRoute, ['waiting.approval', 'account.blocked']) && Auth::user()->status === 'active') {
+            return redirect()->intended('/dashboard');
+        }
         if (Auth::check() && Auth::user()->status === 'pending') {
             return redirect()->route('waiting.approval');
         }
