@@ -1,11 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class AnalyticsController extends Controller
 {
@@ -30,8 +29,8 @@ class AnalyticsController extends Controller
         // ── 2. Top Feelings ────────────────────────────────────
         $topFeelings = DB::table('mood_entry_feelings')
             ->join('mood_entries', 'mood_entries.id', '=', 'mood_entry_feelings.mood_entry_id')
-            ->join('feelings',     'feelings.id',     '=', 'mood_entry_feelings.feeling_id')
-            ->where('mood_entries.user_id',    $user->id)
+            ->join('feelings', 'feelings.id', '=', 'mood_entry_feelings.feeling_id')
+            ->where('mood_entries.user_id', $user->id)
             ->where('mood_entries.entry_date', '>=', $since)
             ->selectRaw('feelings.name, feelings.icon, feelings.color, COUNT(*) as count')
             ->groupBy('feelings.id', 'feelings.name', 'feelings.icon', 'feelings.color')
@@ -41,13 +40,13 @@ class AnalyticsController extends Controller
 
         // ── 3. Best Day of Week ────────────────────────────────
         $dayOfWeek = $user->moodEntries()
-            ->selectRaw('EXTRACT(DOW FROM entry_date) as dow, AVG(mood_level) as avg_mood, COUNT(*) as total') // use DAYOFWEEK for MySQL , i used EXTRACT for postgresql
+            ->selectRaw('DAYOFWEEK(entry_date) as dow, AVG(mood_level) as avg_mood, COUNT(*) as total')
             ->where('entry_date', '>=', $since)
             ->groupBy('dow')
             ->orderBy('dow')
             ->get()
             ->map(fn($row) => [
-                'day'      => ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][(int) $row->dow - 1], // dow-1 because EXTRACT(DOW) returns 0 for Sunday, 1 for Monday not like MySQL's DAYOFWEEK which returns 1 for Sunday
+                'day'      => ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][(int) $row->dow],
                 'avg_mood' => round((float) $row->avg_mood, 1),
                 'total'    => (int) $row->total,
             ]);
@@ -57,7 +56,7 @@ class AnalyticsController extends Controller
 
         // ── 5. Summary stats ──────────────────────────────────
         $periodEntries = $user->moodEntries()->where('entry_date', '>=', $since);
-        $stats = [
+        $stats         = [
             'total_entries'  => $periodEntries->count(),
             'avg_mood'       => round($periodEntries->avg('mood_level') ?? 0, 1),
             'days_possible'  => $days,
