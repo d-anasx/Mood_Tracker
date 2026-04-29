@@ -45,8 +45,8 @@ class GoogleAuthController extends Controller
                         'google_id' => $googleUser->getId(),
                         'password' => Hash::make('password'),
                         'avatar' => $this->getRandomAvatar(),
-                        'role_id' => 2, // User role
-                        'status' => 'pending', // Requires admin approval
+                        'role_id' => 2, 
+                        'status' => 'pending',
                     ]);
                 }
             }

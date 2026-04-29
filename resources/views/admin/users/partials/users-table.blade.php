@@ -46,6 +46,7 @@
         </div>
     </td>
 </tr>
+
 @empty
 <tr>
     <td colspan="6">

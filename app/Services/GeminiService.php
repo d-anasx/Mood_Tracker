@@ -45,9 +45,9 @@ class GeminiService
                     ],
                     'generationConfig' => [
                         'temperature'     => 0.85,
-                        'maxOutputTokens' => 1024, // enough for 2 full sentences
+                        'maxOutputTokens' => 1024, 
                         'topP'            => 0.9,
-                        'stopSequences'   => [], // no early stopping
+                        'stopSequences'   => [], 
                     ],
                 ]);
 
@@ -150,10 +150,6 @@ class GeminiService
      * Analyze journal text and return structured analysis
      */
     /**
-     * Analyze journal text and return structured analysis
-     */
-    /**
-     * Analyze journal text and return structured analysis
      */
     public function analyzeJournal(string $journalText): ?array
     {

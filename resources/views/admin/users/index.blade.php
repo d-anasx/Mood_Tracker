@@ -614,22 +614,7 @@
             });
         });
 
-        // Pagination handler
-        paginationContainer.addEventListener('click', async (e) => {
-            const link = e.target.closest('a');
-            if (!link) return;
-
-            e.preventDefault();
-
-            const url = new URL(link.href);
-            const page = url.searchParams.get('page');
-
-            if (page) {
-                currentPage = parseInt(page);
-                await fetchUsers();
-                document.querySelector('.glass-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
+        
 
         // Modal functions
         function showBlockModal(userId, userName) {

@@ -32,7 +32,7 @@ class UserManagementController extends Controller
         //     });
         // }
 
-        $users = $query->latest()->paginate(20, ['*'], 'page', $page);
+        $users = $query->latest()->paginate();
 
         // Check if AJAX request for real-time search/filter
         if ($request->ajax()) {
@@ -72,7 +72,7 @@ class UserManagementController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(20, ['*'], 'page', $page);
+        $users = $query->latest()->paginate();
 
         $html       = view('admin.users.partials.users-table', compact('users'))->render();
         $pagination = view('admin.users.partials.pagination', compact('users'))->render();
