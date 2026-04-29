@@ -38,7 +38,7 @@ Route::middleware(['auth','check.status'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Mood entries (including AI journal analysis)
+    // Mood entries 
     Route::get('/mood/create', [MoodEntryController::class, 'create'])->name('mood.create');
     Route::post('/mood', [MoodEntryController::class, 'store'])->name('mood.store');
     Route::get('/mood/{id}/edit', [MoodEntryController::class, 'edit'])->name('mood.edit');
@@ -56,7 +56,7 @@ Route::middleware(['auth','check.status'])->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
 
     
-    // Profile (placeholder)
+    // Profile
     Route::get('/profile', function() {
         return view('profile');
     })->name('profile');
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Dashboard
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     
-    // User Management - GET for page load, POST for AJAX search
+    // User Management
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::post('/users/search', [UserManagementController::class, 'search'])->name('users.search');
     
